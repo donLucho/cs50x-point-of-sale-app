@@ -188,7 +188,7 @@ exports.handler = async (event, context, callback) => {
 
     const netlifyresponseobject = {
       statusCode: 200 ,
-      // headers: { 'Content-Type': 'application/json' }, 
+      headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
       body: JSON.stringify( { msg: "User has been added" } )
     };
     return netlifyresponseobject;
