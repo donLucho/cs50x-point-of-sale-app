@@ -54,17 +54,20 @@ const mysql2 = require('mysql2');
 // https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor
 // =============================================
 
-const configurationObj = { 
-  username: DB_USER ,
-  password: DB_PDUB ,
-  database: DB_NAME ,
-  dialect: DB_DIALECT ,
+const configurationObj = {
+  dialect: DB_DIALECT,
   dialectModule: mysql2 ,
+  dialectOptions: {
+    // Your mysql2 options here
+    host: DB_URL ,
+    port: DB_PORT ,
+    user: DB_USER ,
+    password: DB_PDUB ,
+    database: DB_NAME ,
+  },
   protocol: DB_PROTOCOL ,
-  port: DB_PORT ,
-  host: DB_URL ,
   define: {
-    timestamps: false ,
+    timestamps: false
   },
 };
 
@@ -180,19 +183,19 @@ exports.handler = async (event, context, callback) => {
   // console.log( "context", context ); // { clientContext: {} }
   // console.log( "callback", callback );
 
-  let simonsays = undefined;
+  let simonsays;
   
-  // if (event.httpMethod !== "POST") { 
+  if (event.httpMethod !== "POST") { 
     
-  //   const netlifyresponseobject = {
-  //     statusCode: 405 , 
-  //     body: JSON.stringify( { errormessage: "Method Not Allowed" } )
-  //   };
+    const netlifyresponseobject = {
+      statusCode: 405 , 
+      body: JSON.stringify( { errormessage: "Method Not Allowed" } )
+    };
     
-  //   // return netlifyresponseobject;
-  //   simonsays = netlifyresponseobject;
+    // return netlifyresponseobject;
+    simonsays = netlifyresponseobject;
 
-  // }
+  }
 
   try{
     

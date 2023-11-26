@@ -50,17 +50,20 @@ const mysql2 = require('mysql2');
 // https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor
 // =============================================
 
-const configurationObj = { 
-  username: DB_USER ,
-  password: DB_PDUB ,
-  database: DB_NAME ,
-  dialect: DB_DIALECT ,
+const configurationObj = {
+  dialect: DB_DIALECT,
   dialectModule: mysql2 ,
+  dialectOptions: {
+    // Your mysql2 options here
+    host: DB_URL ,
+    port: DB_PORT ,
+    user: DB_USER ,
+    password: DB_PDUB ,
+    database: DB_NAME ,
+  },
   protocol: DB_PROTOCOL ,
-  port: DB_PORT ,
-  host: DB_URL ,
   define: {
-    timestamps: false ,
+    timestamps: false
   },
 };
 
