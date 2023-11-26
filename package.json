@@ -1,0 +1,68 @@
+{
+  "name": "cs50x-point-of-sale-app",
+  "description": "cs50x final project 2023 submitted by Luis Artavia",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "async": "^3.2.5",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "kill-port": "^2.0.1",
+    "mysql2": "^3.6.5",
+    "npm-run-all": "^4.1.5",
+    "pg-hstore": "^2.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.20.0",
+    "react-router-dom": "^6.20.0",
+    "react-scripts": "5.0.1",
+    "sequelize": "^6.35.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    
+    "smores-netlify": "npm install --save async@latest bcrypt@latest jsonwebtoken@latest jwt-decode@latest kill-port@latest mysql2@latest npm-run-all@latest pg-hstore@latest react-router@latest react-router-dom@latest sequelize@latest && npm install --save-dev @babel/plugin-proposal-private-property-in-object @fortawesome/fontawesome-free@latest bootstrap@latest date-fns@latest netlify-cli@latest node-sass@latest react-bootstrap@latest",
+    
+    "requiredlibs": "npm run smores-netlify",
+    
+    "dev": "netlify dev",
+    "truebuild": "netlify build",
+    
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@fortawesome/fontawesome-free": "^6.4.2",
+    "bootstrap": "^5.3.2",
+    "date-fns": "^2.30.0",
+    "netlify-cli": "^17.7.0",
+    "node-sass": "^9.0.0",
+    "react-bootstrap": "^2.9.1"
+  }
+}

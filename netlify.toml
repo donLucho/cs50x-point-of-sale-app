@@ -1,0 +1,105 @@
+# This is PROD_v003_netlify.toml
+
+[build]
+  command="npm run build"
+  functions = "src/lambda"
+  publish = "build"
+
+
+[functions]
+  node_bundler = "esbuild"
+
+
+# dev.framework = "#custom" is default value
+# dev.functions = "netlify/functions" is default value
+
+[dev]
+  command = "npm run start" 
+  functionsPort = 8888 
+  port = 8888 
+  targetPort = 3000 
+  # autoLaunch = true # originally commented - # THIS IS OKAY EITHER ON OR OFF
+  framework = "create-react-app" 
+  functions = "src/lambda" 
+  publish = "build" 
+  staticServerPort = 3999 
+
+
+[[redirects]]
+  from = "/api/getallusers"
+  to = "/.netlify/functions/getallusers"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/userlogin"
+  to = "/.netlify/functions/userlogin"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/userregister"
+  to = "/.netlify/functions/userregister"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/getallproducts"
+  to = "/.netlify/functions/getallproducts"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/createoneproduct"
+  to = "/.netlify/functions/createoneproduct"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/getoneproduct/*"
+  to = "/.netlify/functions/getoneproduct/:splat"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/updateoneproduct"
+  to = "/.netlify/functions/updateoneproduct"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/getalltransactions"
+  to = "/.netlify/functions/getalltransactions"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/gettodaysnumbers"
+  to = "/.netlify/functions/gettodaysnumbers"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/getcustomrange"
+  to = "/.netlify/functions/getcustomrange"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/createonetransaction"
+  to = "/.netlify/functions/createonetransaction"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/getonetransaction/*"
+  to = "/.netlify/functions/getonetransaction/:splat"
+  status = 200
+
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# more info on configuring this file: https://www.netlify.com/docs/netlify-toml-reference/
