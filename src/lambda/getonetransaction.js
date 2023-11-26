@@ -48,6 +48,9 @@ const { v1 } = require("uuid");
 // https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor
 // =============================================
 
+/*
+// original
+
 const configurationObj = { 
   username: DB_USER ,
   password: DB_PDUB ,
@@ -62,6 +65,25 @@ const configurationObj = {
 };
 
 const sequelize = new Sequelize( configurationObj );
+*/
+
+// contingency code
+
+const configurationObj = { 
+  "dialect": DB_DIALECT , 
+  "protocol": DB_PROTOCOL ,
+  "port": DB_PORT ,
+  "host": DB_URL ,
+  "define": {
+    "timestamps": false
+  },
+  // "dialectOptions": {
+  //   "multipleStatements": true
+  // } // c/o https://stackoverflow.com/questions/26062532/how-can-i-run-multiple-raw-queries-with-sequelize-in-mysql
+};
+
+const sequelize = new Sequelize( DB_NAME, DB_USER, DB_PDUB, configurationObj );
+
 
 // =============================================
 // DATABASE CONNECTION 
