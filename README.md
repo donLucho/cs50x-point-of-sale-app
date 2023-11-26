@@ -92,7 +92,7 @@ What typically constitutes endpoints in ExpressJS instead are expressed (pun *no
 
 ## About development
 
-In terms of local development, there is one other thing. The lambda functions (server endpoints) are accessible through **http://localhost:8888/.netlify/functions/<your_function_filename>**. Typically, Create React App is accessible through **http://localhost:3000/**. Therefore, provided that the localhost domain are occupying two very different ports, accomodations have to be made. I needed to add a new file at **./src/setUpProxy.js** file like so:
+In terms of local development, there is one other thing. The lambda functions (server endpoints) are accessible through **http://localhost:8888/.netlify/functions/<your_function_filename>**. Typically, Create React App is accessible through **http://localhost:3000/**. Therefore, provided that the localhost domain is occupying two very different ports, accomodations have to be made. I needed to add a new file at **./src/setUpProxy.js** file like so:
 
 ```sh
 const { createProxyMiddleware } = require('http-proxy-middleware');
