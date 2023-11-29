@@ -1,6 +1,9 @@
 class ApiService{
 
   constructor(){
+    this.customfetch = this.customfetch.bind(this);
+    this.checkStatus = this.checkStatus.bind(this);
+
     this.getAllProducts = this.getAllProducts.bind(this);
     this.createProduct = this.createProduct.bind(this);
     this.getOneProduct = this.getOneProduct.bind(this);
@@ -11,6 +14,8 @@ class ApiService{
     this.getCustomRange = this.getCustomRange.bind(this);
     this.createTransaction = this.createTransaction.bind(this);
     this.getOneTransaction = this.getOneTransaction.bind(this);
+
+    this.massageThePhrase = this.massageThePhrase.bind(this);
   }
 
   customfetch( url, options ){
