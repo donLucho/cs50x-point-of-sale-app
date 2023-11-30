@@ -19,7 +19,6 @@ const {
   DB_USER , 
   DB_PDUB , 
   DB_DIALECT ,
-  DB_PROTOCOL ,
 } = process.env;
 
 // =============================================
@@ -41,7 +40,7 @@ const SALT_ROUNDS = 10;
 
 // const jwt = require('jsonwebtoken');
 
-const mysql2 = require('mysql2');
+
 
 // =============================================
 // DATABASE SETUP AND CONFIG
@@ -53,24 +52,17 @@ const mysql2 = require('mysql2');
 // https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor
 // =============================================
 
-const configurationObj = {
-  dialect: DB_DIALECT,
-  dialectModule: mysql2 ,
-  dialectOptions: {
-    // Your mysql2 options here
-    host: DB_URL ,
-    port: DB_PORT ,
-    user: DB_USER ,
-    password: DB_PDUB ,
-    database: DB_NAME ,
-  },
-  protocol: DB_PROTOCOL ,
+const configurationObj = { 
+  dialect: DB_DIALECT, 
+  dialectModule: require('mysql2'), 
+  host: DB_URL , 
+  port: parseInt(DB_PORT, 10) ,   
   define: {
     timestamps: false
   },
 };
 
-const sequelize = new Sequelize( configurationObj );
+const sequelize = new Sequelize( DB_NAME, DB_USER, DB_PDUB, configurationObj );
 
 // =============================================
 // DATABASE CONNECTION 
