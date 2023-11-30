@@ -3,7 +3,8 @@
 
 JWT_SECRET='abc123'
 
-NODE_ENV='development'
+# NOT NEEDED - these are now inconsequential :)
+# NODE_ENV='development'
 # NODE_ENV='production'
 
 DB_URL='<YOUR_MYSQL_ADDRESS>' # typically 'localhost'
@@ -12,4 +13,4 @@ DB_NAME='<NAME_OF_YOUR_MYSQL_DB>'
 DB_USER='<YOUR_MYSQL_USER>' # typically 'root'
 DB_PDUB='<YOUR_MYSQL_PASSWORD>' # leave blank if using no password but include the field
 DB_DIALECT='mysql' # 'mysql' in this case as opposed to other variants including 'postgres' OR 'microtrash'
-DB_PROTOCOL='tcp' # 'tcp' in this case 
+# DB_PROTOCOL='tcp' # ~~'tcp' in this case ~~ # NOT NEEDED
