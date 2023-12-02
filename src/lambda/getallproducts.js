@@ -52,9 +52,17 @@ const async = require("async");
 // =============================================
 
 const configurationObj = {
+  
+  username: POLYSCALE_AIVENDB_USERNAME ,
+  password: POLYSCALE_AIVENDB_PASSWORD ,
+  database: POLYSCALE_AIVENDB_DATABASE ,
+  ssl: (DB_URL !== 'localhost') ? true : false ,
+  
   dialect: DB_DIALECT, 
   dialectModule: require('mysql2') ,
+
   logging: false ,
+
   dialectOptions: { // Your mysql2 options here
     host: DB_URL ,
     port: parseInt(POLYSCALE_AIVENDB_PORT, 10) ,     
@@ -62,7 +70,6 @@ const configurationObj = {
     password: POLYSCALE_AIVENDB_PASSWORD ,
     database: POLYSCALE_AIVENDB_DATABASE ,
     ssl: {
-      // rejectUnauthorized: true,
       rejectUnauthorized: (DB_URL !== 'localhost') ? true : false ,
     } ,
   } , 
@@ -83,6 +90,9 @@ sequelize.authenticate()
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
 });
+// .finally(() => {
+//   sequelize.close();
+// });
 
 // =============================================
 // MODEL SCHEMA - EVENTS
@@ -237,6 +247,8 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
   }
 
@@ -257,17 +269,61 @@ exports.handler = async (event, context, callback) => {
       } , 
     };
 
-    const products = await Inventory.findAll( await findAllOptions );
+    // const products = await Inventory.findAll( await findAllOptions );
+
+    const products = await Inventory.findAll( await findAllOptions )
+    .then( allproducts => {
+      // console.log( '>>>>>> allproducts: ' , allproducts );
+      return allproducts;
+    } )
+    .catch( ( err ) => {
+      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
+      console.log( `There was derrpage: \n\n` , err ); 
+    } );
+    // .finally(() => {
+    //   console.log( "sequelize", sequelize );
+    // });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
+
     // await console.log( 'await products: ', await products );
+    // await console.log("await products === undefined" , await products === undefined );
+    // await console.log("await products !== undefined" , await products !== undefined );
 
-    const netlifyresponseobject = {
-      statusCode: 200 ,
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
-      body: JSON.stringify( await products ) ,
-    };
+    // #####################
+    // if [products === undefined] / PRODUCTS NOT FOUND
+    // #####################
 
-    simonsays = await netlifyresponseobject;
+    if( await products === undefined ){
+      
+      const netlifyresponseerror = {
+        statusCode: 401 ,
+        body: JSON.stringify( { errormessage : await "Inventory SNAFU occurred!" } ) // Unauthorized
+      }; 
+      
+      simonsays = await netlifyresponseerror; // return netlifyresponseerror;
+      // sequelize.close(); // buuu!!!
+    }
 
+    // #####################
+    // if [products !== undefined] / PRODUCTS FOUND
+    // #####################
+    if( await products !== undefined ){
+
+      const netlifyresponseobject = {
+        statusCode: 200 ,
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
+        body: JSON.stringify( await products ) ,
+        // body: JSON.stringify( await [] ) ,
+      };
+
+      simonsays = await netlifyresponseobject;
+      // sequelize.close(); // buuu!!!
+
+    }
+
+    // sequelize.close(); // buuu!!!
     return simonsays;
   }
   catch(err){
@@ -278,6 +334,10 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
+  // finally{
+    // sequelize.close();
+    // sequelize.connectionManager.close().then(() => console.log('shut down gracefully'));
+  // }
 };
 
 // =============================================
