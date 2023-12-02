@@ -12,12 +12,13 @@ dotenv.config();
 // process.env SETUP
 // =============================================
 const { 
+  POLYSCALE_AIVENDB_CONNECTION_URI,
   DB_URL , 
-  DB_PORT ,
-  DB_NAME , 
-  DB_USER , 
-  DB_PDUB , 
-  DB_DIALECT ,
+  POLYSCALE_AIVENDB_PORT,   
+  POLYSCALE_AIVENDB_DATABASE ,
+  POLYSCALE_AIVENDB_USERNAME ,
+  POLYSCALE_AIVENDB_PASSWORD ,
+  DB_DIALECT , 
 } = process.env;
 
 // =============================================
@@ -50,17 +51,26 @@ const async = require("async");
 // https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor
 // =============================================
 
-const configurationObj = { 
+const configurationObj = {
   dialect: DB_DIALECT, 
-  dialectModule: require('mysql2'), 
-  host: DB_URL , 
-  port: parseInt(DB_PORT, 10) ,   
+  dialectModule: require('mysql2') ,
+  logging: false ,
+  dialectOptions: { // Your mysql2 options here
+    host: DB_URL ,
+    port: parseInt(POLYSCALE_AIVENDB_PORT, 10) ,     
+    user: POLYSCALE_AIVENDB_USERNAME ,
+    password: POLYSCALE_AIVENDB_PASSWORD ,
+    database: POLYSCALE_AIVENDB_DATABASE ,
+    ssl: {
+        rejectUnauthorized: true,
+    },
+  } , 
   define: {
     timestamps: false
   },
 };
 
-const sequelize = new Sequelize( DB_NAME, DB_USER, DB_PDUB, configurationObj );
+const sequelize = new Sequelize(POLYSCALE_AIVENDB_CONNECTION_URI, configurationObj );
 
 // =============================================
 // DATABASE CONNECTION 
