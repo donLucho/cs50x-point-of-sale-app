@@ -34,6 +34,8 @@
     "smores-netlify": "npm install --save @babel/plugin-proposal-private-property-in-object @fortawesome/fontawesome-free@latest async@latest bcrypt@latest bootstrap@latest date-fns@latest jsonwebtoken@latest jwt-decode@latest kill-port@latest mysql2@latest node-sass@latest npm-run-all@latest pg-hstore@latest react-bootstrap@latest react-router@latest react-router-dom@latest sequelize@latest && npm install --save-dev netlify-cli@latest",
     
     "requiredlibs": "npm run smores-netlify",
+
+    "offlinedev": "netlify dev --offline",
     
     "dev": "netlify dev",
     "truebuild": "netlify build",
