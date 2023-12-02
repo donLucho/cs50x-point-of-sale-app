@@ -78,10 +78,13 @@ const sequelize = new Sequelize(POLYSCALE_AIVENDB_CONNECTION_URI, configurationO
 // =============================================
 sequelize.authenticate()
 .then(() => {
-  console.log("Connection has been successfully established.\n\n");
+  console.log("\n\nConnection has been successfully established.\n\n");
 })
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
+})
+.finally(() => {
+  sequelize.close();
 });
 
 // =============================================
@@ -194,6 +197,7 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
 
   }
 
@@ -206,8 +210,18 @@ exports.handler = async (event, context, callback) => {
     // await console.log( 'await email: ', await email ); 
     // await console.log( 'await password: ', await password );
 
-    const userpromise = await getUser( await email );
-    // let userpromise = await getUser( await email );
+    const userpromise = await getUser( await email )
+    .then( user => {
+      // console.log( "user", user );
+      return user;
+    })
+    .catch((error) => {
+      console.error("error" , error );
+    })
+    .finally(() => {
+      sequelize.close();
+    });
+
     // await console.log("await userpromise: " , await userpromise );
     // await console.log("await userpromise instanceof User" , await userpromise instanceof User );
 
@@ -239,7 +253,18 @@ exports.handler = async (event, context, callback) => {
       // await console.log("await password", await password);
       // await console.log("await userpromise.password: " , await userpromise.password );
       
-      let comparisonpromise = await getBcryptComparison( await password , await userpromise.password , await bcrypt );
+      let comparisonpromise = await getBcryptComparison( await password , await userpromise.password , await bcrypt )
+      .then( comparison => {
+        // console.log( "comparison", comparison );
+        return comparison;
+      })
+      .catch((error) => {
+        console.error("error" , error );
+      })
+      .finally(() => {
+        sequelize.close();
+      });
+      
       // await console.log( "await comparisonpromise" , await comparisonpromise );
 
       if( await comparisonpromise === false ){
@@ -258,7 +283,18 @@ exports.handler = async (event, context, callback) => {
         
         // await console.log("In the process of getting a signed token >>>>> ");
 
-        let token = await getJwtToken( await jwt, await JWT_SECRET, await userpromise );
+        let token = await getJwtToken( await jwt, await JWT_SECRET, await userpromise )
+        .then( token => {
+          // console.log( "token", token );
+          return token;
+        })
+        .catch((error) => {
+          console.error("error" , error );
+        })
+        .finally(() => {
+          sequelize.close();
+        });
+
         // await console.log( "await token" , await token );
 
         if( await !token ){
