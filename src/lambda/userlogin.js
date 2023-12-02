@@ -63,8 +63,9 @@ const configurationObj = {
     password: POLYSCALE_AIVENDB_PASSWORD ,
     database: POLYSCALE_AIVENDB_DATABASE ,
     ssl: {
-        rejectUnauthorized: true,
-    },
+      // rejectUnauthorized: true,
+      rejectUnauthorized: (DB_URL !== 'localhost') ? true : false ,
+    } ,
   } , 
   define: {
     timestamps: false
@@ -198,6 +199,7 @@ exports.handler = async (event, context, callback) => {
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
     sequelize.close();
+    return simonsays;
 
   }
 

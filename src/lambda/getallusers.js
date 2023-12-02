@@ -61,8 +61,9 @@ const configurationObj = {
     password: POLYSCALE_AIVENDB_PASSWORD ,
     database: POLYSCALE_AIVENDB_DATABASE ,
     ssl: {
-        rejectUnauthorized: true,
-    },
+      // rejectUnauthorized: true,
+      rejectUnauthorized: (DB_URL !== 'localhost') ? true : false ,
+    } ,
   } , 
   define: {
     timestamps: false

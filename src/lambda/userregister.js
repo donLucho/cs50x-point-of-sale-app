@@ -59,8 +59,9 @@ const configurationObj = {
     password: POLYSCALE_AIVENDB_PASSWORD ,
     database: POLYSCALE_AIVENDB_DATABASE ,
     ssl: {
-        rejectUnauthorized: true,
-    },
+      // rejectUnauthorized: true,
+      rejectUnauthorized: (DB_URL !== 'localhost') ? true : false ,
+    } ,
   } , 
   define: {
     timestamps: false
@@ -159,45 +160,79 @@ exports.handler = async (event, context, callback) => {
   // console.log( "context", context ); // { clientContext: {} }
   // console.log( "callback", callback );
 
-  if (event.httpMethod !== "POST") {
+  let simonsays;
+  
+  if (event.httpMethod !== "POST") { 
     
-    const netlifyresponseerror = {
-      statusCode: 405
-      , body: JSON.stringify( { errormessage: "Method Not Allowed" } )
+    const netlifyresponseobject = {
+      statusCode: 405 , 
+      body: JSON.stringify( { errormessage: "Method Not Allowed" } )
     };
-    
-    return netlifyresponseerror;
 
+    simonsays = netlifyresponseobject; // return netlifyresponseobject;
+    return simonsays;
   }
 
   try{
 
     let { username , email , password } = await JSON.parse( event.body );
     
-    await User.create( await { username , email , password } )
+    const newuserpromise = await User.create( await { username , email , password } )
     .then( newuser => {
       // console.log( '>>>>>> New record added: ' , newuser );
+      return newuser;
     } )
     .catch( ( err ) => {
       // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
     } );
-    
 
-    const netlifyresponseobject = {
-      statusCode: 200 ,
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
-      body: JSON.stringify( { msg: "User has been added" } )
-    };
-    return netlifyresponseobject;
+    // await console.log("await newuserpromise: " , await newuserpromise );
+    // await console.log("await newuserpromise instanceof User" , await newuserpromise instanceof User );
+
+    // #####################
+    // if [newuserpromise instanceof User === false] / NEWUSER NOT CREATED
+    // #####################
+
+    if( await newuserpromise === undefined || await newuserpromise instanceof User === false ){
+
+      const netlifyresponseerror = {
+        statusCode: 401 ,
+        body: JSON.stringify( { errormessage : await "Registration SNAFU occurred!" } ) 
+      };
+      
+      simonsays = await netlifyresponseerror; // return netlifyresponseerror;
+    }
+
+    // #####################
+    // if [newuserpromise instanceof User === true ] / NEWUSER CREATED
+    // #####################
+
+    if( await newuserpromise !== undefined && await newuserpromise instanceof User === true ){
+
+      const netlifyresponseobject = {
+        statusCode: 200 ,
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
+        body: JSON.stringify( { msg: "User has been added" } )
+      };
+
+      // await console.log( "await netlifyresponseobject" , await netlifyresponseobject );
+
+      simonsays = await netlifyresponseobject; // return netlifyresponseobject;
+
+    }
+    return simonsays;
   }
   catch(err){
     // console.log( 'user register err catch: \n\n', JSON.stringify( err, null, 2 ) ); 
-    // console.log( 'user register err catch: ', err );
+    console.log( 'user register err catch: ', err );
     const netlifyresponseerror = {
       statusCode: 500 , 
       body: JSON.stringify( { errormessage : "Internal Error -- problem in posting data."} ) , 
     };
     return netlifyresponseerror;
+  }
+  finally{
+    sequelize.close();
   }
 };
 
