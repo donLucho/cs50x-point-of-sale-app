@@ -52,17 +52,13 @@ const async = require("async");
 // =============================================
 
 const configurationObj = {
-  
   username: POLYSCALE_AIVENDB_USERNAME ,
   password: POLYSCALE_AIVENDB_PASSWORD ,
   database: POLYSCALE_AIVENDB_DATABASE ,
-  ssl: (DB_URL !== 'localhost') ? true : false ,
-  
+  ssl: (DB_URL !== 'localhost') ? true : false ,  
   dialect: DB_DIALECT, 
   dialectModule: require('mysql2') ,
-
   logging: false ,
-
   dialectOptions: { // Your mysql2 options here
     host: DB_URL ,
     port: parseInt(POLYSCALE_AIVENDB_PORT, 10) ,     
