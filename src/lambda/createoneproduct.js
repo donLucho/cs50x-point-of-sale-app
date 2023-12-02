@@ -85,6 +85,9 @@ sequelize.authenticate()
 })
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
+})
+.finally(() => {
+  sequelize.close();
 });
 
 // =============================================
@@ -240,6 +243,9 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
+
   }
 
   try{
@@ -259,13 +265,22 @@ exports.handler = async (event, context, callback) => {
 
     // await console.log("\n newproduct", await newproduct );
 
-    await Inventory.create( await newproduct )
-    .then( newuser => {
-      // console.log( '>>>>>> New record added: ' , newuser );
+    // await Inventory.create( await newproduct )
+
+    const product = await Inventory.create( await newproduct )
+    .then( record => {
+      console.log( "record", record );
+      return record;
     } )
-    .catch( ( err ) => {
-      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
-    } );
+    .catch( ( error ) => {
+      console.error("error" , error );
+    } )
+    .finally(() => {
+      sequelize.close();
+    });
+
+    await console.log("await product: " , await product );
+    await console.log("await product instanceof Inventory" , await product instanceof Inventory );
 
     const netlifyresponseobject = {
       statusCode: 200 ,

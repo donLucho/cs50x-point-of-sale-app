@@ -85,6 +85,9 @@ sequelize.authenticate()
 })
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
+})
+.finally(() => {
+  sequelize.close();
 });
 
 // =============================================
@@ -289,6 +292,8 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
   }
 
@@ -310,7 +315,22 @@ exports.handler = async (event, context, callback) => {
     
     // await console.log("\n newTransaction", await newTransaction );
 
-    const transaction = await Transaction.create( await newTransaction );
+    // const transaction = await Transaction.create( await newTransaction );
+
+    const transaction = await Transaction.create( await newTransaction )
+    .then( record => {
+      console.log( "record", record );
+      return record;
+    })
+    .catch((error) => {
+      console.error("error" , error );
+    })
+    .finally(() => {
+      sequelize.close();
+    });
+
+    await console.log("await transaction: " , await transaction );
+    await console.log("await transaction instanceof Transaction" , await transaction instanceof Transaction );
     
     if( await transaction.items !== undefined ){
       // await console.log( "transaction.items", await transaction.items );
