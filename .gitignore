@@ -33,3 +33,6 @@ yarn-error.log*
 
 # PROXY
 /src/setupProxy.js
+
+# SEQUELIZE CONFIGURATION OBJECT BACK-UP
+/src/database-split-components/connection/sequelize-ICE.db.js
