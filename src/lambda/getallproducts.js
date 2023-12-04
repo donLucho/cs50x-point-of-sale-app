@@ -294,8 +294,8 @@ exports.handler = async (event, context, callback) => {
     if( await products === undefined ){
       
       const netlifyresponseerror = {
-        statusCode: 401 ,
-        body: JSON.stringify( { errormessage : await "Inventory SNAFU occurred!" } ) // Unauthorized
+        statusCode: 405 ,
+        body: JSON.stringify( { errormessage : await "Inventory SNAFU occurred!" } ) 
       }; 
       
       simonsays = await netlifyresponseerror; // return netlifyresponseerror;

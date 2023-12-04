@@ -85,6 +85,9 @@ sequelize.authenticate()
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
 });
+// .finally(() => {
+//   sequelize.close();
+// });
 
 // =============================================
 // MODEL SCHEMA - EVENTS
@@ -155,6 +158,8 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
   }
 
@@ -191,60 +196,105 @@ exports.handler = async (event, context, callback) => {
       } 
     };
 
-    const transactions = await Transaction.findAll( await findTodayOptions );
+    // const transactions = await Transaction.findAll( await findTodayOptions );
+
+    const transactions = await Transaction.findAll( await findTodayOptions )
+    .then( records => {
+      console.log( '>>>>>> records: ' , records );
+      return records;
+    } )
+    .catch( ( err ) => {
+      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
+      console.log( `There was derrpage: \n\n` , err ); 
+    } );
+    // .finally(() => {
+    //   console.log( "sequelize", sequelize );
+    // });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
+
+
     // await console.log( 'await transactions: ', await transactions );
+    // await console.log("await transactions === undefined" , await transactions === undefined );
+    // await console.log("await transactions !== undefined" , await transactions !== undefined );
 
-    if( await transactions.length === 0 ){
-      // await console.log( '\n\n', "transactions.length === 0", await transactions);
-      const netlifyresponseobject = {
-        statusCode: 200 ,
-        body: JSON.stringify( await transactions ) ,
-      };
-      simonsays = await netlifyresponseobject;
-    }
-    
-    if( await transactions.length > 0 ){
+    // #####################
+    // if [transactions === undefined] / TRANSACTIONS NOT FOUND
+    // #####################
+    if( await transactions === undefined ){
       
-      // await console.log( '\n\n', "transactions.length > 0", await transactions);
+      const netlifyresponseerror = {
+        statusCode: 405 ,
+        body: JSON.stringify( { errormessage : await "Today's Numbers SNAFU occurred!" } ) 
+      }; 
       
-      let shallowcopy = [ ...transactions ]; 
-      // await console.log( "shallowcopy", await shallowcopy );
-
-      const mappedTransactions = await shallowcopy.map( (el, idx, arr) => {
-        return { ...el, date: new Date(el.date) }; 
-      } ); 
-      // await console.log( "mappedTransactions", await mappedTransactions );
-
-      const sortDesc = await mappedTransactions.sort( (a,b) => {
-        return new Date( b.date ) - new Date( a.date );
-      } ); 
-      // await console.log( "sortDesc", await sortDesc );
-
-      const reducedSumOfAllSales = await sortDesc.reduce( ( accumulator, el, idx, arr ) => {
-        return accumulator + el.total;
-      } , 0 ); 
-      // await console.log( "reducedSumOfAllSales", await reducedSumOfAllSales ); // 93.98
-
-      
-      const presentableTransactions = await sortDesc.map( (el, idx, arr) => { 
-        return { ...el, date: `${el.date.toLocaleDateString()} ${el.date.toLocaleTimeString()}` }; 
-      } ); 
-      // await console.log("presentableTransactions", await presentableTransactions );      
-
-      const responseObject = {
-        docs: await presentableTransactions ,
-        numbers: await reducedSumOfAllSales 
-      };
-
-      const netlifyresponseobject = {
-        statusCode: 200 ,
-        headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
-        body: JSON.stringify( await responseObject )
-      };
-      simonsays = await netlifyresponseobject;
-      
+      simonsays = await netlifyresponseerror; // return netlifyresponseerror;
+      // sequelize.close(); // buuu!!!
     }
 
+    // #####################
+    // if [transactions !== undefined] / TRANSACTIONS FOUND
+    // #####################
+    if( await transactions !== undefined ){
+
+      if( await transactions.length === 0 ){
+        
+        // await console.log( '\n\n', "transactions.length === 0", await transactions);
+        const netlifyresponseobject = {
+          statusCode: 200 ,
+          body: JSON.stringify( await transactions ) ,
+        };
+
+        simonsays = await netlifyresponseobject;
+        // sequelize.close(); // buuu!!!
+      }
+      
+      if( await transactions.length > 0 ){
+        
+        // await console.log( '\n\n', "transactions.length > 0", await transactions);
+        
+        let shallowcopy = [ ...transactions ]; 
+        // await console.log( "shallowcopy", await shallowcopy );
+
+        const mappedTransactions = await shallowcopy.map( (el, idx, arr) => {
+          return { ...el, date: new Date(el.date) }; 
+        } ); 
+        // await console.log( "mappedTransactions", await mappedTransactions );
+
+        const sortDesc = await mappedTransactions.sort( (a,b) => {
+          return new Date( b.date ) - new Date( a.date );
+        } ); 
+        // await console.log( "sortDesc", await sortDesc );
+
+        const reducedSumOfAllSales = await sortDesc.reduce( ( accumulator, el, idx, arr ) => {
+          return accumulator + el.total;
+        } , 0 ); 
+        // await console.log( "reducedSumOfAllSales", await reducedSumOfAllSales ); // 93.98
+
+        
+        const presentableTransactions = await sortDesc.map( (el, idx, arr) => { 
+          return { ...el, date: `${el.date.toLocaleDateString()} ${el.date.toLocaleTimeString()}` }; 
+        } ); 
+        // await console.log("presentableTransactions", await presentableTransactions );      
+
+        const responseObject = {
+          docs: await presentableTransactions ,
+          numbers: await reducedSumOfAllSales 
+        };
+
+        const netlifyresponseobject = {
+          statusCode: 200 ,
+          headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
+          body: JSON.stringify( await responseObject )
+        };
+
+        simonsays = await netlifyresponseobject;
+        // sequelize.close(); // buuu!!!
+      }      
+    }
+
+    // sequelize.close(); // buuu!!!
     return simonsays;
   }
   catch(err){
@@ -255,6 +305,10 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
+  // finally{
+    // sequelize.close();
+    // sequelize.connectionManager.close().then(() => console.log('shut down gracefully'));
+  // }
 };
 
 // =============================================

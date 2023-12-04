@@ -85,6 +85,9 @@ sequelize.authenticate()
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
 });
+// .finally(() => {
+//   sequelize.close();
+// });
 
 // =============================================
 // MODEL SCHEMA - USERS
@@ -160,12 +163,28 @@ User.prototype.comparePdub = function( plntxtpdub, cb ){
 // =============================================
 
 exports.handler = async (event, context, callback) => {
+  
+  let simonsays;
+  
+  if (event.httpMethod !== "GET") { // only GET
+    
+    const netlifyresponseobject = {
+      statusCode: 405 , 
+      body: JSON.stringify( { errormessage: "Method Not Allowed" } )
+    };
+    
+    // return netlifyresponseobject;
+    simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
-  // console.log( "event", event );
-  // console.log( "context", context ); // { clientContext: {} }
-  // console.log( "callback", callback );
+  }
 
   try{
+
+    // console.log( "event", event );
+    // console.log( "context", context ); // { clientContext: {} }
+    // console.log( "callback", callback );
     
     const findAllOptions = { 
       attributes: {
@@ -173,16 +192,61 @@ exports.handler = async (event, context, callback) => {
       } ,
     };
 
-    const users = await User.findAll( await findAllOptions );
-    // await console.log( 'await users: ', await users );
+    // const users = await User.findAll( await findAllOptions );
 
-    const netlifyresponseobject = {
-      statusCode: 200 ,
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
-      body: JSON.stringify( await users ) ,
-    };
-    
-    return netlifyresponseobject;
+    const users = await User.findAll( await findAllOptions )
+    .then( records => {
+      console.log( '>>>>>> records: ' , records );
+      return records;
+    } )
+    .catch( ( err ) => {
+      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
+      console.log( `There was derrpage: \n\n` , err ); 
+    } );
+    // .finally(() => {
+    //   console.log( "sequelize", sequelize );
+    // });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
+
+    // await console.log( 'await users: ', await users );
+    // await console.log("await users === undefined" , await users === undefined );
+    // await console.log("await users !== undefined" , await users !== undefined );
+
+    // #####################
+    // if [users === undefined] / USERS NOT FOUND
+    // #####################
+    if( await users === undefined ){
+      
+      const netlifyresponseerror = {
+        statusCode: 405 ,
+        body: JSON.stringify( { errormessage : await "Users SNAFU occurred!" } ) 
+      }; 
+      
+      simonsays = await netlifyresponseerror; // return netlifyresponseerror;
+      // sequelize.close(); // buuu!!!
+    }
+
+    // #####################
+    // if [users !== undefined] / USERS FOUND
+    // #####################
+    if( await users !== undefined ){
+      
+      const netlifyresponseobject = {
+        statusCode: 200 ,
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
+        body: JSON.stringify( await users ) ,
+        // body: JSON.stringify( await [] ) ,
+      };
+
+      simonsays = await netlifyresponseobject;
+      // sequelize.close(); // buuu!!!
+
+    }
+
+    // sequelize.close(); // buuu!!!
+    return simonsays;
   }
   catch(err){
     // console.log( 'response err catch: \n\n', JSON.stringify( err, null, 2 ) ); // console.log( 'response err catch: ', err );
@@ -192,6 +256,10 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
+  // finally{
+    // sequelize.close();
+    // sequelize.connectionManager.close().then(() => console.log('shut down gracefully'));
+  // }
 };
 
 // =============================================

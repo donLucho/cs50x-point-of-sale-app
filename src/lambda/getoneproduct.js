@@ -86,6 +86,9 @@ sequelize.authenticate()
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
 });
+// .finally(() => {
+//   sequelize.close();
+// });
 
 // =============================================
 // MODEL SCHEMA - EVENTS
@@ -240,6 +243,8 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
   }
 
@@ -264,8 +269,27 @@ exports.handler = async (event, context, callback) => {
       }
     };
 
-    const product = await Inventory.findOne( await findOneCurrentParam );
+    // const product = await Inventory.findOne( await findOneCurrentParam );
+
+    const product = await Inventory.findOne( await findOneCurrentParam )
+    .then( records => {
+      console.log( '>>>>>> records: ' , records );
+      return records;
+    } )
+    .catch( ( err ) => {
+      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
+      console.log( `There was derrpage: \n\n` , err ); 
+    } );
+    // .finally(() => {
+    //   console.log( "sequelize", sequelize );
+    // });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
+
     // await console.log( 'await product: ', await product );
+    // await console.log("await product === null" , await product === null );
+    // await console.log("await product !== null" , await product !== null );
 
     if(await product === null){
 
@@ -274,18 +298,23 @@ exports.handler = async (event, context, callback) => {
         body: JSON.stringify( { errormessage : await "Product not found." } ) // Not found
       };
       
-      simonsays = await netlifyresponseerror; 
+      simonsays = await netlifyresponseerror;
+      // sequelize.close(); // buuu!!!
     }
     else 
     if(await product !== null){
+      
       const netlifyresponseobject = {
         statusCode: 200 ,
         headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
         body: JSON.stringify( await product ) ,
       };
+
       simonsays = await netlifyresponseobject;
+      // sequelize.close(); // buuu!!!
     }
 
+    // sequelize.close(); // buuu!!!
     return simonsays;
   }
   catch(err){
@@ -296,6 +325,10 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
+  // finally{
+    // sequelize.close();
+    // sequelize.connectionManager.close().then(() => console.log('shut down gracefully'));
+  // }
 };
 
 // =============================================

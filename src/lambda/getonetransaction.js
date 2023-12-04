@@ -85,6 +85,9 @@ sequelize.authenticate()
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
 });
+// .finally(() => {
+//   sequelize.close();
+// });
 
 // =============================================
 // MODEL SCHEMA - EVENTS
@@ -155,6 +158,8 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
   }
 
@@ -179,8 +184,27 @@ exports.handler = async (event, context, callback) => {
       }
     };
 
-    const rawTransaction = await Transaction.findOne( await findParam );
+    // const rawTransaction = await Transaction.findOne( await findParam );
+
+    const rawTransaction = await Transaction.findOne( await findParam )
+    .then( records => {
+      console.log( '>>>>>> records: ' , records );
+      return records;
+    } )
+    .catch( ( err ) => {
+      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
+      console.log( `There was derrpage: \n\n` , err ); 
+    } );
+    // .finally(() => {
+    //   console.log( "sequelize", sequelize );
+    // });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
+
     // await console.log( 'await rawTransaction: ', await rawTransaction );
+    // await console.log("await rawTransaction === null" , await rawTransaction === null );
+    // await console.log("await rawTransaction !== null" , await rawTransaction !== null );
 
     if(await rawTransaction === null){
 
@@ -189,7 +213,8 @@ exports.handler = async (event, context, callback) => {
         body: JSON.stringify( { errormessage : await "Product not found." } ) // Not found
       };
       
-      simonsays = await netlifyresponseerror; 
+      simonsays = await netlifyresponseerror;
+      // sequelize.close(); // buuu!!!
     }
     else 
     if(await rawTransaction !== null){
@@ -201,10 +226,13 @@ exports.handler = async (event, context, callback) => {
         headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
         body: JSON.stringify( await shallowcopy ) ,
       };
+
       simonsays = await netlifyresponseobject;
+      // sequelize.close(); // buuu!!!
 
     }
 
+    // sequelize.close(); // buuu!!!
     return simonsays;
   }
   catch(err){
@@ -215,6 +243,10 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
+  // finally{
+    // sequelize.close();
+    // sequelize.connectionManager.close().then(() => console.log('shut down gracefully'));
+  // }
 };
 
 // =============================================

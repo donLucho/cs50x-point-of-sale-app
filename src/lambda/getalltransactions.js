@@ -85,6 +85,9 @@ sequelize.authenticate()
 .catch((error) => {
   console.error("Unable to connect to DB: \n\n" , error );
 });
+// .finally(() => {
+//   sequelize.close();
+// });
 
 // =============================================
 // MODEL SCHEMA - EVENTS
@@ -155,6 +158,8 @@ exports.handler = async (event, context, callback) => {
     
     // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
+    sequelize.close();
+    return simonsays;
 
   }
 
@@ -176,17 +181,60 @@ exports.handler = async (event, context, callback) => {
       } , 
     };
 
-    const transactions = await Transaction.findAll( await findAllOptions );
+    // const transactions = await Transaction.findAll( await findAllOptions );
+
+    const transactions = await Transaction.findAll( await findAllOptions )
+    .then( records => {
+      console.log( '>>>>>> records: ' , records );
+      return records;
+    } )
+    .catch( ( err ) => {
+      // console.log( `There was derrpage: \n\n` , JSON.stringify( err, null, 2 ) ); 
+      console.log( `There was derrpage: \n\n` , err ); 
+    } );
+    // .finally(() => {
+    //   console.log( "sequelize", sequelize );
+    // });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
+
     // await console.log( 'await transactions: ', await transactions );
+    // await console.log("await transactions === undefined" , await transactions === undefined );
+    // await console.log("await transactions !== undefined" , await transactions !== undefined );
 
-    const netlifyresponseobject = {
-      statusCode: 200 ,
-      headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
-      body: JSON.stringify( await transactions ) ,
-    };
+    // #####################
+    // if [transactions === undefined] / TRANSACTIONS NOT FOUND
+    // #####################
+    if( await transactions === undefined ){
+      
+      const netlifyresponseerror = {
+        statusCode: 405 ,
+        body: JSON.stringify( { errormessage : await "Transactions SNAFU occurred!" } ) 
+      }; 
+      
+      simonsays = await netlifyresponseerror; // return netlifyresponseerror;
+      // sequelize.close(); // buuu!!!
+    }
 
-    simonsays = await netlifyresponseobject;
+    // #####################
+    // if [transactions !== undefined] / TRANSACTIONS FOUND
+    // #####################
+    if( await transactions !== undefined ){
 
+      const netlifyresponseobject = {
+        statusCode: 200 ,
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' }, 
+        body: JSON.stringify( await transactions ) ,
+        // body: JSON.stringify( await [] ) ,
+      };
+
+      simonsays = await netlifyresponseobject;
+      // sequelize.close(); // buuu!!!
+
+    }
+
+    // sequelize.close(); // buuu!!!
     return simonsays;
   }
   catch(err){
@@ -197,6 +245,10 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
+  // finally{
+    // sequelize.close();
+    // sequelize.connectionManager.close().then(() => console.log('shut down gracefully'));
+  // }
 };
 
 // =============================================
