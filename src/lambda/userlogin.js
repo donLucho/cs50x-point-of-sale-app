@@ -1,176 +1,27 @@
 // =============================================
-// LOCAL DEVELOPMENT ENV VARS SETUP 
-// if( process.env.NODE_ENV !== 'production' ){const dotenv = require('dotenv'); dotenv.config();} // overkill
-// --
-// UNCOMMENT FOR LOCAL TESTING
-// COMMENT FOR SHIPPING 
+// IMPORT each MODEL and CONNECTION OBJECT
 // =============================================
-const dotenv = require('dotenv');
-dotenv.config();
-
-// =============================================
-// process.env SETUP
-// =============================================
-const { 
-  JWT_SECRET ,
-  POLYSCALE_AIVENDB_CONNECTION_URI,
-  DB_URL , 
-  POLYSCALE_AIVENDB_PORT,   
-  POLYSCALE_AIVENDB_DATABASE ,
-  POLYSCALE_AIVENDB_USERNAME ,
-  POLYSCALE_AIVENDB_PASSWORD ,
-  DB_DIALECT , 
-} = process.env;
+const { User , JWT_SECRET , sequelize } = require('../database-split-components/models/user.model');
 
 // =============================================
 // BASE SETUP
 // =============================================
-const { 
-  Sequelize ,
-  DataTypes ,
-  fn, 
-  Op,
-} = require("sequelize");
+const { Op } = require("sequelize");
 
 // =============================================
 // ADDITIONAL SETUP AND RELATED VARIABLES
 // =============================================
-const { v1 } = require("uuid");
-
 const bcrypt = require('bcrypt');
-const SALT_ROUNDS = 10;
-
 const jwt = require('jsonwebtoken');
-
-// =============================================
-// DATABASE SETUP AND CONFIG
-// "sequelize createdAt + updatedAt"
-// https://stackoverflow.com/questions/20386402/sequelize-unknown-column-createdat-in-field-list
-// https://sequelize.org/docs/v6/getting-started/#connecting-to-a-database
-// https://sequelize.org/docs/v6/getting-started/#logging
-// https://sequelize.org/docs/v6/getting-started/#tip-for-reading-the-docs
-// https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor
-// =============================================
-
-const configurationObj = {
-  username: POLYSCALE_AIVENDB_USERNAME ,
-  password: POLYSCALE_AIVENDB_PASSWORD ,
-  database: POLYSCALE_AIVENDB_DATABASE ,
-  ssl: (DB_URL !== 'localhost') ? true : false ,  
-  dialect: DB_DIALECT, 
-  dialectModule: require('mysql2') ,
-  logging: false ,
-  dialectOptions: { // Your mysql2 options here
-    host: DB_URL ,
-    port: parseInt(POLYSCALE_AIVENDB_PORT, 10) ,     
-    user: POLYSCALE_AIVENDB_USERNAME ,
-    password: POLYSCALE_AIVENDB_PASSWORD ,
-    database: POLYSCALE_AIVENDB_DATABASE ,
-    ssl: {
-      rejectUnauthorized: (DB_URL !== 'localhost') ? true : false ,
-    } ,
-  } , 
-  define: {
-    timestamps: false
-  },
-};
-
-const sequelize = new Sequelize(POLYSCALE_AIVENDB_CONNECTION_URI, configurationObj );
-
-// =============================================
-// DATABASE CONNECTION 
-// =============================================
-sequelize.authenticate()
-.then(() => {
-  console.log("\n\nConnection has been successfully established.\n\n");
-})
-.catch((error) => {
-  console.error("Unable to connect to DB: \n\n" , error );
-})
-.finally(() => {
-  sequelize.close();
-});
-
-// =============================================
-// MODEL SCHEMA - USERS
-// =============================================
-
-// console.log( "User model, standing-by!!!\n\n" );
-
-const User = sequelize.define( 
-    
-    "users" , 
-
-    {
-      
-      id: {
-        type: DataTypes.STRING.BINARY ,
-        defaultValue: fn( 'UUID_TO_BIN' , v1() ) , 
-        primaryKey: true , 
-        allowNull: false , 
-        unique: true , 
-      } , 
-
-      username: {
-        type: DataTypes.STRING({ length: 150 }) , 
-        allowNull: false , 
-      } , 
-      
-      email: {
-        type: DataTypes.STRING({ length: 150 }) , 
-        allowNull: false , 
-      } , 
-
-      password: {
-        type: DataTypes.STRING({ length: 150 }) , 
-        allowNull: false , 
-      } , 
-
-    }  , 
-    
-    { 
-      tableName: "users" , 
-
-      hooks: {
-        beforeCreate: async (user, options) => {
-          if ( await user.password) {
-            // console.log( "options\n\n" , await options , "\n\n" );
-            // console.log( 'beforeCreate: this\n\n' , await this + '\n\n' ); // [object Object]
-            // console.log( `username is: ${ await user.username}` + `\n\n`);
-            const salt = await bcrypt.genSalt( await SALT_ROUNDS );
-            user.password = await bcrypt.hash( await user.password , await salt );
-          }
-        } ,
-        beforeUpdate: async (user, options) => {
-          if ( await user.password) {
-            const salt = await bcrypt.genSalt( await SALT_ROUNDS );
-            user.password = await bcrypt.hash( await user.password , await salt );
-          }
-        } , 
-      } , 
-    } , 
-);
-
-User.prototype.comparePdub = function( plntxtpdub, cb ){
-  bcrypt.compare( plntxtpdub, this.password, function( err, isMatch ){
-    if( err ){ return cb(err); }    
-    // cb( err, isMatch ); // generate the generic status text error from here
-    cb( null, isMatch ); // generate the specific error text from the route
-  } );
-};
-// LUCHO END
 
 // =============================================
 // HELPER FUNCTIONS FOR USE WITH MAIN LAMBDA FUNCTION
 // =============================================
-
 async function getUser( email ){
-  // return Promise.resolve( User.findOne( { email: email } ) );
   return Promise.resolve( await User.findOne(  { where: { email: { [Op.eq]: await email } } } ) );
 }
 
 async function getBcryptComparison( password, hash, bcrypt ){
-  // return Promise.resolve( await bcrypt.compare( await password , await hash )  );
   return Promise.resolve( bcrypt.compare( password , hash )  );
 }
 
@@ -181,9 +32,8 @@ async function getJwtToken( jwt, secret , user ){
 }
 
 // =============================================
-// START LAMBDA FUNCTION
+// LAMBDA FUNCTION
 // =============================================
-
 exports.handler = async (event, context, callback) => {
 
   // console.log( "event", event );
@@ -199,11 +49,9 @@ exports.handler = async (event, context, callback) => {
       body: JSON.stringify( { errormessage: "Method Not Allowed" } )
     };
     
-    // return netlifyresponseobject;
     simonsays = netlifyresponseobject;
     sequelize.close();
     return simonsays;
-
   }
 
   try{
@@ -222,10 +70,10 @@ exports.handler = async (event, context, callback) => {
     })
     .catch((error) => {
       console.error("error" , error );
-    })
-    .finally(() => {
-      sequelize.close();
     });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
 
     // await console.log("await userpromise: " , await userpromise );
     // await console.log("await userpromise instanceof User" , await userpromise instanceof User );
@@ -236,15 +84,11 @@ exports.handler = async (event, context, callback) => {
     
     if( await userpromise === null && await userpromise instanceof User === false ){
 
-      // await console.log("if not userpromise...");
-
       const netlifyresponseerror = {
-        statusCode: 401 ,
+        statusCode: await 401 ,
         body: JSON.stringify( { errormessage : await "Invalid Email. Go register!" } ) // Unauthorized
       }; 
-      
-      simonsays = await netlifyresponseerror; // return netlifyresponseerror;
-
+      simonsays = await netlifyresponseerror; 
     }
 
 
@@ -265,22 +109,18 @@ exports.handler = async (event, context, callback) => {
       })
       .catch((error) => {
         console.error("error" , error );
-      })
-      .finally(() => {
-        sequelize.close();
       });
+      // .finally(() => {
+      //   sequelize.close();
+      // });
       
       // await console.log( "await comparisonpromise" , await comparisonpromise );
 
       if( await comparisonpromise === false ){
-        
-        // await console.log("if await comparisonpromise === false...");
-
         const netlifyresponseerror = {
-          statusCode: 404, 
+          statusCode: await 404, 
           body: JSON.stringify( { errormessage : await "Invalid Password. Try again!" } ) // Not found
         };
-
         simonsays = await netlifyresponseerror; 
       }
 
@@ -295,22 +135,17 @@ exports.handler = async (event, context, callback) => {
         })
         .catch((error) => {
           console.error("error" , error );
-        })
-        .finally(() => {
-          sequelize.close();
         });
-
-        // await console.log( "await token" , await token );
+        // .finally(() => {
+        //   sequelize.close();
+        // });
 
         if( await !token ){
           
-          // await console.log( "jwt sign err" );
-
           const netlifyresponseerror = {
-            statusCode: 500 , 
+            statusCode: await 400 , 
             body: JSON.stringify( { errormessage: await "jwt sign err" } )
           };
-          
           simonsays = await netlifyresponseerror; 
         }
 
@@ -321,7 +156,6 @@ exports.handler = async (event, context, callback) => {
         };
 
         // await console.log( "await netlifyresponseobject" , await netlifyresponseobject );
-
         simonsays = await netlifyresponseobject;
       }
     }
@@ -329,7 +163,6 @@ exports.handler = async (event, context, callback) => {
 
   }
   catch(err){
-    // console.log( 'user login err catch: \n\n', JSON.stringify( err, null, 2 ) ); 
     // console.log( 'user login err catch: ', err );
     const netlifyresponseerror = {
       statusCode: 500 , 
@@ -338,7 +171,3 @@ exports.handler = async (event, context, callback) => {
     return netlifyresponseerror;
   }
 };
-
-// =============================================
-// END LAMBDA FUNCTION
-// =============================================
