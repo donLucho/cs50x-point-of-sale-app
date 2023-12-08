@@ -158,7 +158,8 @@ const configObjAiven1 = {
   dialect: 'mysql', 
 
   // if NOT --offline , WHETHER OR NOT dialectModule IS SET at all, so far has NO IMPACT
-  // dialectModule: require("mysql2") , 
+  // in production, this line has to be uncommented
+  dialectModule: require("mysql2") , 
 
   // logging: console.log , 
   // logging: false ,
@@ -212,7 +213,8 @@ const configObjAiven2 = {
   dialect: 'mysql', 
 
   // if NOT --offline , WHETHER OR NOT dialectModule IS SET at all, so far has NO IMPACT
-  // dialectModule: require("mysql2") , 
+  // in production, this line has to be uncommented
+  dialectModule: require("mysql2") , 
 
   // logging: console.log , 
   // logging: false ,
