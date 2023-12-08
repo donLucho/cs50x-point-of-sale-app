@@ -6,7 +6,7 @@ const { Inventory } = require('../database-split-components/models/inventory.mod
 // =============================================
 // BASE SETUP
 // =============================================
-const { Op, fn } = require("sequelize");
+const { Op , where , fn } = require("sequelize");
 
 // =============================================
 // LAMBDA FUNCTION

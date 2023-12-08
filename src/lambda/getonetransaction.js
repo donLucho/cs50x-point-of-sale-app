@@ -6,7 +6,7 @@ const { Transaction } = require('../database-split-components/models/transaction
 // =============================================
 // BASE SETUP
 // =============================================
-const { fn , col } = require("sequelize");
+const { where , fn , col } = require("sequelize");
 
 // =============================================
 // LAMBDA FUNCTION

@@ -6,7 +6,7 @@ const { User , JWT_SECRET , sequelize } = require('../database-split-components/
 // =============================================
 // BASE SETUP
 // =============================================
-const { Op } = require("sequelize");
+const { Op , where } = require("sequelize");
 
 // =============================================
 // ADDITIONAL SETUP AND RELATED VARIABLES
@@ -17,19 +17,22 @@ const jwt = require('jsonwebtoken');
 // =============================================
 // HELPER FUNCTIONS FOR USE WITH MAIN LAMBDA FUNCTION
 // =============================================
-async function getUser( email ){
-  return Promise.resolve( await User.findOne(  { where: { email: { [Op.eq]: await email } } } ) );
-}
+// async function getUser( email ){
+//   // return Promise.resolve( await User.findOne(  { where: { email: { [Op.eq]: await email } } } ) );
+//   let answer = Promise.resolve( await User.findOne(  { where: { email: { [Op.eq]: await email } } } ) );
+//   await console.log('await answer', await answer);
+//   return await answer;
+// }
 
-async function getBcryptComparison( password, hash, bcrypt ){
-  return Promise.resolve( bcrypt.compare( password , hash )  );
-}
+// async function getBcryptComparison( password, hash, bcrypt ){
+//   return Promise.resolve( bcrypt.compare( password , hash )  );
+// }
 
-async function getJwtToken( jwt, secret , user ){
-  let params = { user: await user };
-  let finerdetails = await { expiresIn: '1h' };
-  return Promise.resolve( await jwt.sign( await params, await secret, await finerdetails ) );
-}
+// async function getJwtToken( jwt, secret , user ){
+//   let params = { user: await user };
+//   let finerdetails = await { expiresIn: '1h' };
+//   return Promise.resolve( await jwt.sign( await params, await secret, await finerdetails ) );
+// }
 
 // =============================================
 // LAMBDA FUNCTION
@@ -39,6 +42,8 @@ exports.handler = async (event, context, callback) => {
   // console.log( "event", event );
   // console.log( "context", context ); // { clientContext: {} }
   // console.log( "callback", callback );
+
+  await console.log( 'await User', await User); // users
 
   let simonsays;
   
@@ -63,20 +68,23 @@ exports.handler = async (event, context, callback) => {
     // await console.log( 'await email: ', await email ); 
     // await console.log( 'await password: ', await password );
 
-    const userpromise = await getUser( await email )
-    .then( user => {
-      // console.log( "user", user );
-      return user;
-    })
-    .catch((error) => {
-      console.error("error" , error );
-    });
+    // const userpromise = await getUser( await email )
+    // .then( user => {
+    //   // console.log( "user", user );
+    //   return user;
+    // })
+    // .catch((error) => {
+    //   console.error("error" , error );
+    // });
     // .finally(() => {
     //   sequelize.close();
     // });
 
-    // await console.log("await userpromise: " , await userpromise );
-    // await console.log("await userpromise instanceof User" , await userpromise instanceof User );
+    // Promise.resolve()
+    const userpromise = await User.findOne( { where: { email: { [Op.eq]: await email } } } );
+
+    await console.log("await userpromise: " , await userpromise );
+    await console.log("await userpromise instanceof User" , await userpromise instanceof User );
 
     // #####################
     // if [userpromise === null] / USER NOT FOUND
@@ -102,19 +110,20 @@ exports.handler = async (event, context, callback) => {
       // await console.log("await password", await password);
       // await console.log("await userpromise.password: " , await userpromise.password );
       
-      let comparisonpromise = await getBcryptComparison( await password , await userpromise.password , await bcrypt )
-      .then( comparison => {
-        // console.log( "comparison", comparison );
-        return comparison;
-      })
-      .catch((error) => {
-        console.error("error" , error );
-      });
+      // let comparisonpromise = await getBcryptComparison( await password , await userpromise.password , await bcrypt )
+      // .then( comparison => {
+      //   // console.log( "comparison", comparison );
+      //   return comparison;
+      // })
+      // .catch((error) => {
+      //   console.error("error" , error );
+      // });
       // .finally(() => {
       //   sequelize.close();
       // });
-      
-      // await console.log( "await comparisonpromise" , await comparisonpromise );
+
+      let comparisonpromise = await bcrypt.compare( await password , await userpromise.password );
+      await console.log( "await comparisonpromise" , await comparisonpromise );
 
       if( await comparisonpromise === false ){
         const netlifyresponseerror = {
@@ -128,26 +137,31 @@ exports.handler = async (event, context, callback) => {
         
         // await console.log("In the process of getting a signed token >>>>> ");
 
-        let token = await getJwtToken( await jwt, await JWT_SECRET, await userpromise )
-        .then( token => {
-          // console.log( "token", token );
-          return token;
-        })
-        .catch((error) => {
-          console.error("error" , error );
-        });
+        // let token = await getJwtToken( await jwt, await JWT_SECRET, await userpromise )
+        // .then( token => {
+        //   // console.log( "token", token );
+        //   return token;
+        // })
+        // .catch((error) => {
+        //   console.error("error" , error );
+        // });
         // .finally(() => {
         //   sequelize.close();
         // });
 
+        let params = { user: await userpromise };
+        let finerdetails = await { expiresIn: '1h' };
+        let token = await jwt.sign( await params, await JWT_SECRET, await finerdetails );
+
         if( await !token ){
-          
           const netlifyresponseerror = {
             statusCode: await 400 , 
             body: JSON.stringify( { errormessage: await "jwt sign err" } )
           };
           simonsays = await netlifyresponseerror; 
         }
+
+        if( await !!token ){ await console.log( "await token", await token ); }
 
         const netlifyresponseobject = {
           statusCode: 200 ,

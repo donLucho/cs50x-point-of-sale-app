@@ -28,11 +28,8 @@ yarn-error.log*
 # PERSONAL
 /0-baxx-ice-prod
 /kltr
-# package-lock.json
+package-lock.json
 .env
 
 # PROXY
 /src/setupProxy.js
-
-# SEQUELIZE CONFIGURATION OBJECT BACK-UP
-/src/database-split-components/connection/sequelize-ICE.db.js
