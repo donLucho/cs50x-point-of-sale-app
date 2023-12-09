@@ -152,7 +152,9 @@ const configObjAiven1 = {
   // then options.database DOES NOT HAVE AN IMPACT 
   // BUT options.dialectOptions.database WILL HAVE AN IMPACT
 
-  // database: CUSTOM_AIVEN_DB_NAME , 
+  username: CUSTOM_AIVEN_DB_USER , 
+  password: CUSTOM_AIVEN_DB_PDUB , 
+  database: CUSTOM_AIVEN_DB_NAME , 
   
   // WHETHER --offline OR NOT, ssl HAS NO impact whether on or off
   ssl: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : undefined ,  // UNCOMMENTED
@@ -172,8 +174,8 @@ const configObjAiven1 = {
     port: parseInt(CUSTOM_AIVEN_DB_PORT, 10) , // port: parseInt(DB_PORT, 10) , 
     
     // WHETHER these (3) are SET or UNSET... ACTUALLY IS YET TBD (originally uncommented)
-    // user: CUSTOM_AIVEN_DB_USER , 
-    // password: CUSTOM_AIVEN_DB_PDUB , 
+    user: CUSTOM_AIVEN_DB_USER , 
+    password: CUSTOM_AIVEN_DB_PDUB , 
 
     // If CUSTOM_AIVEN_CONNECTION_URI = '.../Cs50x_pos_dev' or '.../Cs50x_pos_dev?ssl-mode=REQUIRED'
     // then database CAN to be UNSET given that user\username and password are buried in CUSTOM_AIVEN_CONNECTION_URI
@@ -210,8 +212,12 @@ const sequelize = new Sequelize(CUSTOM_AIVEN_CONNECTION_URI, configObjAiven1 );
 /*
 const configObjAiven2 = {
   
+  // username: CUSTOM_AIVEN_DB_USER , 
+  // password: CUSTOM_AIVEN_DB_PDUB , 
+  // database: CUSTOM_AIVEN_DB_NAME , 
+
   // WHETHER --offline OR NOT, ssl HAS NO impact whether on or off
-  // ssl: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : undefined ,  // UNCOMMENTED
+  ssl: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : undefined ,  // UNCOMMENTED
 
   dialect: 'mysql', 
 
@@ -228,9 +234,9 @@ const configObjAiven2 = {
     port: parseInt(CUSTOM_AIVEN_DB_PORT, 10) , 
     
     // WHETHER these (3) are SET or UNSET... ACTUALLY IS YET TBD (originally uncommented)
-    // user: CUSTOM_AIVEN_DB_USER , 
-    // password: CUSTOM_AIVEN_DB_PDUB , 
-    // database: CUSTOM_AIVEN_DB_NAME , 
+    user: CUSTOM_AIVEN_DB_USER , 
+    password: CUSTOM_AIVEN_DB_PDUB , 
+    database: CUSTOM_AIVEN_DB_NAME , 
 
     ssl: {
       
