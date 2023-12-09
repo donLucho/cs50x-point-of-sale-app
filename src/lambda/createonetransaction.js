@@ -40,7 +40,7 @@ exports.handler = async (event, context, callback) => {
       items: await items , 
       tax: await tax , 
     };    
-    // await console.log("\n newTransaction", await newTransaction );
+    await console.log("\n newTransaction", await newTransaction );
 
     const transaction = await Transaction.create( await newTransaction )
     .then( record => {
@@ -48,14 +48,15 @@ exports.handler = async (event, context, callback) => {
       return record;
     })
     .catch((error) => {
-      // console.error("error" , error );
+      console.error("error" , error );
     });
 
     // await console.log("await transaction: " , await transaction );
     // await console.log("await transaction instanceof Transaction" , await transaction instanceof Transaction );
     
     if( await transaction.items !== undefined ){
-      await Inventory.decrementInventory( JSON.parse( await transaction.items ) ); 
+      await Inventory.decrementInventory( await JSON.parse( transaction.items ) ); // correct!
+      // await Inventory.decrementInventory( JSON.parse( await transaction.items ) );
     }
 
     const netlifyresponseobject = {
@@ -68,7 +69,7 @@ exports.handler = async (event, context, callback) => {
     return simonsays;
   }
   catch(err){
-    // console.log( 'response err catch: ', err );
+    console.log( 'response err catch: ', err );
     const netlifyresponseerror = {
       statusCode: 500 , 
       body: JSON.stringify( { message: err.message } )

@@ -74,17 +74,16 @@ Inventory.decrementInventory = function(arrItems){ // yeppers
         
         var queryPm = {
           where: {
-            id: { 
-              [Op.eq]: fn( 'UUID_TO_BIN' , purchasedItem.id ) 
-            }
+            id: fn( 'UUID_TO_BIN' , purchasedItem.id )
           } 
         };
+
         // console.log( '\n\n' , "queryPm", queryPm );
 
         Inventory.findOne( queryPm )
         .then( itemInStock => {
           if (itemInStock === null) {
-            // console.log( '\n\n' , 'Not found!');
+            console.log( '\n\n' , 'Not found!');
           } 
           else {
             return itemInStock;
@@ -92,6 +91,9 @@ Inventory.decrementInventory = function(arrItems){ // yeppers
         } )
         .then( itemInStock => {
           try{
+            
+            // console.log( '\n\n' , 'itemInStock', itemInStock);
+
             if( itemInStock.quantity >= purchasedItem.quantity ){
               
               // console.log( '\n' , `Successfully purchased ${purchasedItem.quantity} ${purchasedItem.name}s!`);
@@ -109,7 +111,8 @@ Inventory.decrementInventory = function(arrItems){ // yeppers
                 quantity: itemInStock.quantity - purchasedItem.quantity
               };
 
-              Inventory.update( updatedItem , optionsPm );
+              return Inventory.update( updatedItem , optionsPm ); // correct!
+              // Inventory.update( updatedItem , optionsPm );
 
             }
             else
@@ -138,7 +141,7 @@ Inventory.decrementInventory = function(arrItems){ // yeppers
 
     err => {
       if (err) {
-        // console.error( '\n\n' , "err.message: " , err.message );
+        console.error( '\n\n' , "err.message: " , err.message );
       }
     }
 
