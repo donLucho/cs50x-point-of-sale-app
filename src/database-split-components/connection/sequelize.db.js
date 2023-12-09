@@ -145,7 +145,7 @@ const sequelize = new Sequelize(POLYSCALE_AIVENDB_CONNECTION_URI, configObjPolys
 
 // #3/4 (WINNER!!!) WITH REMOVED .env file and with lines 5 and 6 commented (E.G. - dotenv)
 
-/*
+/**/
 const configObjAiven1 = {  
   
   // If CUSTOM_AIVEN_CONNECTION_URI = '.../defaultdb' or '.../defaultdb?ssl-mode=REQUIRED'
@@ -203,10 +203,11 @@ const configObjAiven1 = {
   },
 };
 const sequelize = new Sequelize(CUSTOM_AIVEN_CONNECTION_URI, configObjAiven1 );
-*/
+/**/
 
 // #4/4 (WINNER!!!) WITH REMOVED .env file and with lines 5 and 6 commented (E.G. - dotenv)
 
+/*
 const configObjAiven2 = {
   
   // WHETHER --offline OR NOT, ssl HAS NO impact whether on or off
@@ -249,6 +250,7 @@ const configObjAiven2 = {
   },
 };
 const sequelize = new Sequelize( CUSTOM_AIVEN_DB_NAME, CUSTOM_AIVEN_DB_USER, CUSTOM_AIVEN_DB_PDUB, configObjAiven2 );
+*/
 
 // =============================================
 // DATABASE CONNECTION

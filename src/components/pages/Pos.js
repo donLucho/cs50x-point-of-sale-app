@@ -162,26 +162,28 @@ const Pos = (props) => {
     
   };
 
-  const handlePaymentSubmission = (event) => {
+  // async/await is NEW
+  const handlePaymentSubmission = async (event) => { 
     
     event.preventDefault(); // console.log( "event", event );
 
-    customHideCheckoutModal();
+    await customHideCheckoutModal();
     
     // console.log( "grandTotal", grandTotal );
     // console.log( "salesTax", salesTax );
     // console.log( "totalPayment", totalPayment );
 
-    var amountDifference = Number( parseFloat( (grandTotal + salesTax) - totalPayment).toFixed(2) );
-    if( (grandTotal + salesTax) <= totalPayment ){
-      setChangeDue( amountDifference );
-      customShowReceiptModal(); 
-      handleSaveToDB();
-      setItems( [] );
+    var amountDifference = Number( parseFloat( (await grandTotal + await salesTax) - await totalPayment).toFixed(2) );
+    
+    if( (await grandTotal + await salesTax) <= await totalPayment ){
+      await setChangeDue( await amountDifference );
+      await customShowReceiptModal(); 
+      await handleSaveToDB();
+      await setItems( [] );
     }
     else{
-      setChangeDue( amountDifference );
-      customShowAmountDueModal();
+      await setChangeDue( await amountDifference );
+      await customShowAmountDueModal();
     }
   };
 

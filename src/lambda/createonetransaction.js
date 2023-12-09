@@ -10,8 +10,9 @@ const { Inventory } = require('../database-split-components/models/inventory.mod
 const { fn } = require("sequelize");
 
 // =============================================
-// LAMBDA FUNCTION
+// START LAMBDA FUNCTION
 // =============================================
+
 exports.handler = async (event, context, callback) => {
 
   let simonsays;
@@ -40,7 +41,9 @@ exports.handler = async (event, context, callback) => {
       items: await items , 
       tax: await tax , 
     };    
-    await console.log("\n newTransaction", await newTransaction );
+    // await console.log("\n newTransaction", await newTransaction );
+
+    // const transaction = await Transaction.create( await newTransaction );
 
     const transaction = await Transaction.create( await newTransaction )
     .then( record => {
@@ -50,13 +53,17 @@ exports.handler = async (event, context, callback) => {
     .catch((error) => {
       console.error("error" , error );
     });
+    // .finally(() => {
+    //   sequelize.close();
+    // });
 
     // await console.log("await transaction: " , await transaction );
     // await console.log("await transaction instanceof Transaction" , await transaction instanceof Transaction );
     
     if( await transaction.items !== undefined ){
       await Inventory.decrementInventory( await JSON.parse( transaction.items ) ); // correct!
-      // await Inventory.decrementInventory( JSON.parse( await transaction.items ) );
+      // await Inventory.decrementInventory( JSON.parse( await transaction.items ) ); 
+      // await console.log( "transaction.items", await transaction.items );
     }
 
     const netlifyresponseobject = {
@@ -77,3 +84,7 @@ exports.handler = async (event, context, callback) => {
     return netlifyresponseerror;
   }
 };
+
+// =============================================
+// END LAMBDA FUNCTION
+// =============================================
