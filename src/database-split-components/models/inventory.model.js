@@ -60,88 +60,91 @@ const Inventory = sequelize.define(
 
 Inventory.decrementInventory = function(arrItems){ // yeppers
   
-  // console.log( "Inventory.decrementInventory arrItems", arrItems );
+  console.log( "Inventory.decrementInventory arrItems", arrItems );
 
   async.forEachOf( 
     
     arrItems, 
 
-    ( purchasedItem, idx, callback ) => { 
+    async ( purchasedItem, idx, callback ) => { 
       
       // console.log( '\n\n' , "purchasedItem", purchasedItem );
 
       try {
         
-        var queryPm = {
+        var findParam = {
           where: {
-            id: fn( 'UUID_TO_BIN' , purchasedItem.id )
+            id: fn( 'UUID_TO_BIN' , await purchasedItem.id )
           } 
         };
 
-        // console.log( '\n\n' , "queryPm", queryPm );
+        // console.log( '\n\n' , "findParam", findParam );
 
-        Inventory.findOne( queryPm )
-        .then( itemInStock => {
-          if (itemInStock === null) {
-            console.log( '\n\n' , 'Not found!');
-          } 
-          else {
-            return itemInStock;
-          }
-        } )
-        .then( itemInStock => {
+        let itemInStock = await Inventory.findOne( await findParam );
+        
+        if (await itemInStock === null){
+          console.log( '\n\n' , 'Not found!');
+        }
+        
+        if (await itemInStock !== null) {
+          
           try{
             
-            // console.log( '\n\n' , 'itemInStock', itemInStock);
+            await console.log( '\n\n' , 'await itemInStock', await itemInStock);
 
-            if( itemInStock.quantity >= purchasedItem.quantity ){
+            if( await itemInStock.quantity >= await purchasedItem.quantity ){
               
-              // console.log( '\n' , `Successfully purchased ${purchasedItem.quantity} ${purchasedItem.name}s!`);
+              await console.log( '\n' , `Successfully purchased ${await purchasedItem.quantity} ${await purchasedItem.name}s!`);
               
               var optionsPm = {
                 where: {
                   id: { 
-                    [Op.eq]: fn( 'UUID_TO_BIN' , purchasedItem.id ) 
+                    [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
                   }
                 } 
               };
 
+              var qtyDiff = await itemInStock.quantity - await purchasedItem.quantity; 
+
               const updatedItem = {
                 ...itemInStock,
-                quantity: itemInStock.quantity - purchasedItem.quantity
+                quantity: await qtyDiff
               };
 
-              return Inventory.update( updatedItem , optionsPm ); // correct!
-              // Inventory.update( updatedItem , optionsPm );
+              // let updatedinventory = Inventory.update( await updatedItem , await optionsPm ); // original
+              let updatedinventory = itemInStock.update( await updatedItem , await optionsPm ); // better...
+              await console.log("await updatedinventory: " , await updatedinventory );
+              return await updatedinventory;
 
             }
             else
-            if( itemInStock.quantity < purchasedItem.quantity ){
-              // console.error('\n' ,"Cannot complete this portion of transaction");
-              // console.error(`Attempted to buy ${purchasedItem.quantity} ${purchasedItem.name}s but there are only ${itemInStock.quantity} available!`);
+            if( await itemInStock.quantity < await purchasedItem.quantity ){
+              await console.error('\n' ,"Cannot complete this portion of transaction");
+              await console.error(`Attempted to buy ${await purchasedItem.quantity} ${await purchasedItem.name}s but there are only ${await itemInStock.quantity} available!`);
             }
           }
           catch(derrp){
-            // console.log( '\n\n' , "try/catch derrp", derrp );
+            console.log( '\n\n' , "try/catch derrp", derrp );
             return callback(derrp);
           }
           
-        } )
-        .catch( ( err ) => {
-          // console.log( '\n\n' , `There was derrpage: ` , JSON.stringify( err, null, 2 ) );
-          return callback(err);
-        } );
+        }
+        // .catch( ( err ) => {
+        //   console.log( '\n\n' , `There was derrpage: ` , err );
+        //   return callback(err);
+        // } );
         
       }
       catch(e){
-        // console.log( '\n\n' , "try/catch e", e );
+        console.log( '\n\n' , "try/catch e", e );
         return callback(e);
       }
     } , 
 
     err => {
       if (err) {
-        console.error( '\n\n' , "err.message: " , err.message );
+        console.error( '\n\n' , "err: " , err );
+        // console.error( '\n\n' , "err.message: " , err.message );
       }
     }
 
