@@ -50,16 +50,13 @@ exports.handler = async (event, context, callback) => {
     })
     .catch((error) => {
       // console.error("error" , error );
-    })
-    .finally(() => {
-      sequelize.close();
     });
 
     // await console.log("await transaction: " , await transaction );
     // await console.log("await transaction instanceof Transaction" , await transaction instanceof Transaction );
     
     if( await transaction.items !== undefined ){
-      await Inventory.decrementInventory( await JSON.parse( transaction.items ) ); 
+      await Inventory.decrementInventory( JSON.parse( await transaction.items ) ); 
     }
 
     const netlifyresponseobject = {

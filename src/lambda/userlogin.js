@@ -23,7 +23,7 @@ exports.handler = async (event, context, callback) => {
   // console.log( "context", context ); // { clientContext: {} }
   // console.log( "callback", callback );
 
-  await console.log( 'await User', await User); // users
+  // await console.log( 'await User', await User); // users
 
   let simonsays;
   
@@ -101,9 +101,9 @@ exports.handler = async (event, context, callback) => {
           simonsays = await netlifyresponseerror; 
         }
 
-        if( await !!token ){
-          await console.log( "await token", await token );
-        }
+        // if( await !!token ){
+        //   await console.log( "await token", await token );
+        // }
 
         const netlifyresponseobject = {
           statusCode: 200 ,
