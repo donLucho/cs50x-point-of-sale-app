@@ -10,20 +10,22 @@
 // =============================================
 const { 
   // ---------------------------- universal
-  JWT_SECRET ,
-  CA_CERT ,   
+  JWT_SECRET , 
+  // CA_CERT , 
+  
   // ---------------------------- polyscale
-  POLYSCALE_AIVENDB_CONNECTION_URI,
-  POLYSCALE_AIVENDB_PORT , // DB_PORT , 
-  POLYSCALE_AIVENDB_DATABASE , // DB_NAME , 
-  POLYSCALE_AIVENDB_USERNAME , // DB_USER , 
-  POLYSCALE_AIVENDB_PASSWORD , // DB_PDUB , 
+  POLYSCALE_AIVENDB_CONNECTION_URI , 
+  POLYSCALE_AIVENDB_PORT , 
+  POLYSCALE_AIVENDB_DATABASE , 
+  POLYSCALE_AIVENDB_USERNAME , 
+  POLYSCALE_AIVENDB_PASSWORD , 
   DB_URL , 
+  
   // ---------------------------- aiven
   CUSTOM_AIVEN_CONNECTION_URI , 
   CUSTOM_AIVEN_DB_PORT , 
-  CUSTOM_AIVEN_DB_NAME ,
-  CUSTOM_AIVEN_DB_USER ,
+  CUSTOM_AIVEN_DB_NAME , 
+  CUSTOM_AIVEN_DB_USER , 
   CUSTOM_AIVEN_DB_PDUB , 
   CUSTOM_AIVEN_DB_URL , 
 } = process.env;
