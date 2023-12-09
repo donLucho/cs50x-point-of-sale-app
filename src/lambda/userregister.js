@@ -65,9 +65,6 @@ exports.handler = async (event, context, callback) => {
     };
     return netlifyresponseerror;
   }
-  // finally{
-  //   sequelize.close();
-  // }
 };
 
 // 2020 - Docs on event and context https://www.netlify.com/docs/functions/#the-handler-method

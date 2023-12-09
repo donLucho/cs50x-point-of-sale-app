@@ -22,7 +22,6 @@ exports.handler = async (event, context, callback) => {
       body: JSON.stringify( { errormessage: "Method Not Allowed" } )
     };
     simonsays = netlifyresponseobject;
-    sequelize.close();
     return simonsays;
   }
 

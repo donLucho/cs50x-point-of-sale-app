@@ -35,7 +35,6 @@ exports.handler = async (event, context, callback) => {
     };
     
     simonsays = netlifyresponseobject;
-    sequelize.close();
     return simonsays;
   }
 

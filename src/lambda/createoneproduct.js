@@ -21,7 +21,6 @@ exports.handler = async (event, context, callback) => {
       body: JSON.stringify( { errormessage: "Method Not Allowed" } )
     };
     simonsays = netlifyresponseobject;
-    sequelize.close();
     return simonsays;
   }
 
@@ -49,10 +48,7 @@ exports.handler = async (event, context, callback) => {
     } )
     .catch( ( error ) => {
       // console.error("error" , error );
-    } )
-    .finally(() => {
-      sequelize.close();
-    });
+    } );
 
     // await console.log("await product: " , await product );
     // await console.log("await product instanceof Inventory" , await product instanceof Inventory );
