@@ -14,8 +14,7 @@ const { Op , fn } = require("sequelize");
 // =============================================
 // ADDITIONAL SETUP AND RELATED VARIABLES
 // =============================================
-// const async = require("async");
-const {forEachOf} = require("async");
+const eachLimit = require("async/eachLimit");
 
 // =============================================
 // START LAMBDA FUNCTION
@@ -38,8 +37,8 @@ exports.handler = async (event, context, callback) => {
     
     await console.log( "decrementInventory arrItems", await arrItems );
 
-    let cbFunk = async ( purchasedItem, idx, callback ) => { 
-        
+    let iterateeFunk = async ( purchasedItem, callback ) => { 
+      
       // await console.log( '\n\n' , "await purchasedItem", await purchasedItem );
 
       try {
@@ -88,11 +87,12 @@ exports.handler = async (event, context, callback) => {
                 quantity: await qtyDiff
               };
 
-              let updatedinventory = await Inventory.update( await updatedQuantity , await optionsPm ); // on a lark...
-              // let updatedinventory = await itemInStock.update( await updatedQuantity , await optionsPm ); // lkgc
+              // let updatedinventory = await Inventory.update( await updatedQuantity , await optionsPm ); 
+
+              let updatedinventory = await itemInStock.update( await updatedQuantity , await optionsPm ); 
               await console.log("await updatedinventory: " , await updatedinventory );
               
-              return await updatedinventory;
+              // return await updatedinventory;
               // return updatedinventory;
             }
             else
@@ -112,15 +112,18 @@ exports.handler = async (event, context, callback) => {
         return callback(e);
       }
     };
-    
-    let errorFunk = async (err) => {
-      if (err) {
-        console.error( '\n\n' , "err: " , err );
-        // console.error( '\n\n' , "err.message: " , err.message );
-      }
-    };
-    
-    return await forEachOf( await arrItems, await cbFunk , await errorFunk ); // END async.forEachOf()
+
+    try{
+      // return is new!
+      let inventoryAdjustments = await eachLimit( arrItems, 1, iterateeFunk ); // END eachLimit()
+      await console.log('All individual items have been processed successfully.');
+      return inventoryAdjustments;
+    }
+    catch(err){
+      console.error( '\n\n' , "err: " , err );
+      // console.error( '\n\n' , "err.message: " , err.message );
+    }
+
 
   }; // END decrementInventory
   
