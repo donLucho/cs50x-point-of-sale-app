@@ -15,6 +15,7 @@ const { Op , fn } = require("sequelize");
 // ADDITIONAL SETUP AND RELATED VARIABLES
 // =============================================
 // const async = require("async");
+const {forEachOf} = require("async");
 
 // =============================================
 // START LAMBDA FUNCTION
@@ -35,100 +36,98 @@ exports.handler = async (event, context, callback) => {
 
   const decrementInventory = async (arrItems) => {
     
-    return await arrItems.forEach( async (purchasedItem,idx,arr) => {
+    // await console.log( "decrementInventory arrItems", await arrItems );
+
+    // await async.forEachOf( 
+    return await forEachOf( 
       
-      try {
-          
-        var findParam = {
-          where: {
-            id: { 
-              [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
-            }
-          } 
-        };
+      arrItems, 
 
-        // console.log( '\n\n' , "findParam", findParam );
+      async ( purchasedItem, idx, callback ) => { 
+        
+        // await console.log( '\n\n' , "await purchasedItem", await purchasedItem );
 
-        let itemInStock = await Inventory.findOne( await findParam );
-        
-        // if (await itemInStock === null){
-        //   console.log( '\n\n' , 'Not found!');
-        // }
-        
-        if (await itemInStock !== null) {
+        try {
           
-          try{
+          var findParam = {
+            where: {
+              id: { 
+                [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
+              }
+            } 
+          };
+
+          // console.log( '\n\n' , "findParam", findParam );
+
+          let itemInStock = await Inventory.findOne( await findParam );
+          
+          // if (await itemInStock === null){
+          //   console.log( '\n\n' , 'Not found!');
+          // }
+          
+          if (await itemInStock !== null) {
             
-            // await console.log( '\n\n' , 'await itemInStock', await itemInStock);
-            // await console.log('typeof await itemInStock.quantity', typeof await itemInStock.quantity); // number
-            // await console.log('typeof await purchasedItem.quantity', typeof await purchasedItem.quantity); // number
-
-            if( await itemInStock.quantity >= await purchasedItem.quantity ){
+            try{
               
-              // await console.log( '\n' , `Successfully purchased ${await purchasedItem.quantity} ${await purchasedItem.name}s!`);
-              
-              var optionsPm = await {
-                where: {
-                  id: { 
-                    [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
-                  }
-                } 
-              };
+              // await console.log( '\n\n' , 'await itemInStock', await itemInStock);
+              // await console.log('typeof await itemInStock.quantity', typeof await itemInStock.quantity); // number
+              // await console.log('typeof await purchasedItem.quantity', typeof await purchasedItem.quantity); // number
 
-              // await console.log( 'await optionsPm', await optionsPm );
+              if( await itemInStock.quantity >= await purchasedItem.quantity ){
+                
+                // await console.log( '\n' , `Successfully purchased ${await purchasedItem.quantity} ${await purchasedItem.name}s!`);
+                
+                var optionsPm = await {
+                  where: {
+                    id: { 
+                      [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
+                    }
+                  } 
+                };
 
-              var qtyDiff = await itemInStock.quantity - await purchasedItem.quantity; 
+                // await console.log( 'await optionsPm', await optionsPm );
 
-              const updatedQuantity = await {
-                quantity: await qtyDiff
-              };
+                var qtyDiff = await itemInStock.quantity - await purchasedItem.quantity; 
 
-              // let updatedinventory = await Inventory.update( await updatedQuantity , await optionsPm ); 
+                const updatedQuantity = await {
+                  quantity: await qtyDiff
+                };
 
-              let updatedinventory = await itemInStock.update( await updatedQuantity , await optionsPm ); 
-              await console.log("await updatedinventory: " , await updatedinventory );
-              return await updatedinventory;
-              // return updatedinventory;
+                // let updatedinventory = await Inventory.update( await updatedQuantity , await optionsPm ); 
+
+                let updatedinventory = await itemInStock.update( await updatedQuantity , await optionsPm ); 
+                await console.log("await updatedinventory: " , await updatedinventory );
+                
+                // return await updatedinventory;
+                return updatedinventory;
+              }
+              else
+              if( await itemInStock.quantity < await purchasedItem.quantity ){
+                await console.error('\n' ,"Cannot complete this portion of transaction");
+                await console.error(`Attempted to buy ${await purchasedItem.quantity} ${await purchasedItem.name}s but there are only ${await itemInStock.quantity} available!`);
+              }
             }
-            else
-            if( await itemInStock.quantity < await purchasedItem.quantity ){
-
-              await console.error('\n' ,"Cannot complete this portion of transaction");
-
-              await console.error(`Attempted to buy ${await purchasedItem.quantity} ${await purchasedItem.name}s but there are only ${await itemInStock.quantity} available!`);
-              
-              const netlifyresponseerror = {
-                statusCode: await 200 , 
-                body: JSON.stringify( { errormessage: await `Cannot complete this portion of transaction. Attempted to buy ${await purchasedItem.quantity} ${await purchasedItem.name}s but there are only ${await itemInStock.quantity} available!` } )
-              };
-              simonsays = await netlifyresponseerror;
-            }
+            catch(derrp){
+              console.log( '\n\n' , "try/catch derrp", derrp );
+              return callback(derrp);
+            }  
           }
-          catch(derrp){
-            
-            console.log( '\n\n' , "try/catch derrp", derrp );
-            // return callback(derrp);
-            const netlifyresponseerror = {
-              statusCode: await 400 , 
-              body: JSON.stringify( { errormessage: await derrp } )
-            };
-            simonsays = await netlifyresponseerror; 
-          }  
+        }
+        catch(e){
+          console.log( '\n\n' , "try/catch e", e );
+          return callback(e);
+        }
+      } , 
+
+      err => {
+        if (err) {
+          console.error( '\n\n' , "err: " , err );
+          // console.error( '\n\n' , "err.message: " , err.message );
         }
       }
-      catch(e){
-        
-        console.log( '\n\n' , "try/catch e", e );
-        // return callback(e);
-        const netlifyresponseerror = {
-          statusCode: await 400 , 
-          body: JSON.stringify( { errormessage: e } )
-        };
-        simonsays = await netlifyresponseerror; 
 
-      }
-
-    } );
+    ); // END async.forEachOf()
+    
 
   }; // END decrementInventory
   
