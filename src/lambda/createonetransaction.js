@@ -1,476 +1,20 @@
-
 // =============================================
-// ENV VARS SETUP 
+// IMPORT each CONNECTION OBJECT and MODEL(s)
 // =============================================
-// const dotenv = require('dotenv');
-// dotenv.config();
-
-// =============================================
-// process.env SETUP
-// =============================================
-const { 
-  // ---------------------------- universal
-  JWT_SECRET , 
-  // CA_CERT , 
-  
-  // ---------------------------- polyscale
-  POLYSCALE_AIVENDB_CONNECTION_URI , 
-  POLYSCALE_AIVENDB_PORT , 
-  POLYSCALE_AIVENDB_DATABASE , 
-  POLYSCALE_AIVENDB_USERNAME , 
-  POLYSCALE_AIVENDB_PASSWORD , 
-  DB_URL , 
-  
-  // ---------------------------- aiven
-  CUSTOM_AIVEN_CONNECTION_URI , 
-  CUSTOM_AIVEN_DB_PORT , 
-  CUSTOM_AIVEN_DB_NAME , 
-  CUSTOM_AIVEN_DB_USER , 
-  CUSTOM_AIVEN_DB_PDUB , 
-  CUSTOM_AIVEN_DB_URL , 
-} = process.env;
-
-// =============================================
-// process - EXTRA!!! EXTRA!!! 
-// =============================================
-// console.log('ABC123',process);
+// const { Transaction , sequelize } = require('../database-split-components/models/transaction.model');
+const { Transaction } = require('../database-split-components/models/transaction.model');
+const { Inventory } = require('../database-split-components/models/inventory.model');
 
 // =============================================
 // BASE SETUP
 // =============================================
-const { 
-  Sequelize ,
-  DataTypes ,
-  Op, 
-  fn, 
-  col, 
-  where,
-} = require("sequelize");
+// const { fn } = require("sequelize");
+const { Op , fn } = require("sequelize");
 
 // =============================================
 // ADDITIONAL SETUP AND RELATED VARIABLES
 // =============================================
-const { v1 } = require("uuid");
 const async = require("async");
-
-// =============================================
-// DATABASE SETUP AND CONFIG
-// =============================================
-
-// #1/4 WHEN .env is REMOVED... it PRODUCES >>> ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT
-
-/*
-const configObjPolyscale1 = {
-  
-  // username: POLYSCALE_AIVENDB_USERNAME ,
-  // password: POLYSCALE_AIVENDB_PASSWORD ,
-  // database: POLYSCALE_AIVENDB_DATABASE ,
-
-  ssl: (DB_URL !== 'localhost') ? true : undefined ,  // UNCOMMENTED
-  dialect: 'mysql',   
-  dialectModule: require("mysql2") ,
-  
-  // logging: false ,
-  // logging: console.log , 
-  
-  dialectOptions: { // Your mysql2 options here
-    
-    host: DB_URL ,
-    port: parseInt(POLYSCALE_AIVENDB_PORT, 10) , 
-
-    // user: POLYSCALE_AIVENDB_USERNAME , 
-    // password: POLYSCALE_AIVENDB_PASSWORD , 
-    // database: POLYSCALE_AIVENDB_DATABASE , 
-
-    // WHETHER options.ssl is undefined or set to true while options.dialectOptions.ssl is not configured,
-    // then, the outcome MAY BE >>> AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user '<username>'@'<some_ip_address>' (using password: YES)
-
-    ssl: {
-
-      // WHETHER --offline OR NOT, whether rejectUnauthorized set to either true or false has no impact
-      rejectUnauthorized: (DB_URL !== 'localhost') ? true : false , // switchback to true!!!
-      // rejectUnauthorized: false , 
-
-      // ca PRODUCES >>> ConnectionError [SequelizeConnectionError]: unable to get local issuer certificate
-      // ca: (DB_URL !== 'localhost') ? CA_CERT.replace(/\\n/g, "\n") : null , 
-    } , 
-    
-  } , 
-  define: {
-    timestamps: false
-  },
-};
-const sequelize = new Sequelize( POLYSCALE_AIVENDB_DATABASE, POLYSCALE_AIVENDB_USERNAME, POLYSCALE_AIVENDB_PASSWORD, configObjPolyscale1 ); 
-*/
-
-// #2/4 WHEN .env is REMOVED... it PRODUCES >>> ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT
-
-/*
-const configObjPolyscale2 = {
-  
-  username: POLYSCALE_AIVENDB_USERNAME ,
-  password: POLYSCALE_AIVENDB_PASSWORD ,
-  database: POLYSCALE_AIVENDB_DATABASE ,
-  
-  ssl: (DB_URL !== 'localhost') ? true : undefined , // UNCOMMENTED
-  dialect: 'mysql', 
-  dialectModule: require("mysql2") , 
-
-  // logging: false ,
-  // logging: console.log , 
-
-  dialectOptions: { // Your mysql2 options here
-
-    host: DB_URL ,
-    port: parseInt(POLYSCALE_AIVENDB_PORT, 10) , 
-    
-    user: POLYSCALE_AIVENDB_USERNAME , 
-    password: POLYSCALE_AIVENDB_PASSWORD , 
-    database: POLYSCALE_AIVENDB_DATABASE , 
-    
-    // WHETHER options.ssl is undefined or set to true while options.dialectOptions.ssl is not configured,
-    // then, the outcome MAY BE >>> AccessDeniedError [SequelizeAccessDeniedError]: Access denied for user '<username>'@'<some_ip_address>' (using password: YES)
-
-    ssl: {
-
-      // WHETHER --offline OR NOT, whether rejectUnauthorized set to either true or false has no impact
-      rejectUnauthorized: (DB_URL !== 'localhost') ? true : false , // switchback to true!!!
-      // rejectUnauthorized: false , 
-      
-      // ca PRODUCES >>> ConnectionError [SequelizeConnectionError]: unable to get local issuer certificate
-      // ca: (DB_URL !== 'localhost') ? CA_CERT.replace(/\\n/g, "\n") : null , 
-    } , 
-
-    // insecureAuth: true , // Default value is false    // UNCOMMENT, THEN, UTILIZE
-    // connectTimeout: 30000 , // Default value is 10000 // BAD IDEA
-  } , 
-  define: {
-    timestamps: false
-  },
-};
-const sequelize = new Sequelize(POLYSCALE_AIVENDB_CONNECTION_URI, configObjPolyscale2 );
-*/
-
-// #3/4 (WINNER!!!) WITH REMOVED .env file and with lines 5 and 6 commented (E.G. - dotenv)
-
-/**/
-const configObjAiven1 = {  
-  
-  // If CUSTOM_AIVEN_CONNECTION_URI = '.../defaultdb' or '.../defaultdb?ssl-mode=REQUIRED'
-  // then options.database DOES NOT HAVE AN IMPACT 
-  // BUT options.dialectOptions.database WILL HAVE AN IMPACT
-
-  username: CUSTOM_AIVEN_DB_USER , 
-  password: CUSTOM_AIVEN_DB_PDUB , 
-  database: CUSTOM_AIVEN_DB_NAME , 
-  
-  // WHETHER --offline OR NOT, ssl HAS NO impact whether on or off
-  ssl: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : undefined ,  // UNCOMMENTED
-  
-  dialect: 'mysql', 
-
-  // if NOT --offline , WHETHER OR NOT dialectModule IS SET at all, so far has NO IMPACT
-  // in production, this line has to be uncommented
-  dialectModule: require("mysql2") , 
-
-  // logging: console.log , 
-  // logging: false ,
-  
-  dialectOptions: { // Your mysql2 options here
-
-    host: CUSTOM_AIVEN_DB_URL ,
-    port: parseInt(CUSTOM_AIVEN_DB_PORT, 10) , // port: parseInt(DB_PORT, 10) , 
-    
-    // WHETHER these (3) are SET or UNSET... ACTUALLY IS YET TBD (originally uncommented)
-    user: CUSTOM_AIVEN_DB_USER , 
-    password: CUSTOM_AIVEN_DB_PDUB , 
-
-    // If CUSTOM_AIVEN_CONNECTION_URI = '.../Cs50x_pos_dev' or '.../Cs50x_pos_dev?ssl-mode=REQUIRED'
-    // then database CAN to be UNSET given that user\username and password are buried in CUSTOM_AIVEN_CONNECTION_URI
-
-    // But, if CUSTOM_AIVEN_CONNECTION_URI = '.../defaultdb' or '.../defaultdb?ssl-mode=REQUIRED'
-    // then database HAS to be SET given that user\username and password are buried in CUSTOM_AIVEN_CONNECTION_URI
-    database: CUSTOM_AIVEN_DB_NAME , 
-    
-    ssl: {
-      
-      // WHETHER --offline OR NOT, if rejectUnauthorized IS NOT SET EXPLICITLY TO false, 
-      // e.g. rejectUnauthorized: false 
-      // PRODUCES >>> ConnectionError [SequelizeConnectionError]: self-signed certificate in certificate chain
-      // rejectUnauthorized: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : false ,
-      rejectUnauthorized: false , 
-
-      // WHETHER ca is SET or UNSET HAS NO impact AT ALL
-      // ca: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? CA_CERT.replace(/\\n/g, "\n") : null , 
-      // ca: CA_CERT.replace(/\\n/g, "\n") ,
-    } ,
-
-    // insecureAuth: true , // Default value is false    // UNCOMMENT, THEN, UTILIZE
-    // connectTimeout: 30000 , // Default value is 10000 // BAD IDEA
-  } , 
-  define: {
-    timestamps: false
-  },
-};
-const sequelize = new Sequelize(CUSTOM_AIVEN_CONNECTION_URI, configObjAiven1 );
-/**/
-
-// #4/4 (WINNER!!!) WITH REMOVED .env file and with lines 5 and 6 commented (E.G. - dotenv)
-
-/*
-const configObjAiven2 = {
-  
-  // username: CUSTOM_AIVEN_DB_USER , 
-  // password: CUSTOM_AIVEN_DB_PDUB , 
-  // database: CUSTOM_AIVEN_DB_NAME , 
-
-  // WHETHER --offline OR NOT, ssl HAS NO impact whether on or off
-  ssl: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : undefined ,  // UNCOMMENTED
-
-  dialect: 'mysql', 
-
-  // if NOT --offline , WHETHER OR NOT dialectModule IS SET at all, so far has NO IMPACT
-  // in production, this line has to be uncommented
-  dialectModule: require("mysql2") , 
-
-  // logging: console.log , 
-  // logging: false ,
-  
-  dialectOptions: { // Your mysql2 options here
-
-    host: CUSTOM_AIVEN_DB_URL ,
-    port: parseInt(CUSTOM_AIVEN_DB_PORT, 10) , 
-    
-    // WHETHER these (3) are SET or UNSET... ACTUALLY IS YET TBD (originally uncommented)
-    user: CUSTOM_AIVEN_DB_USER , 
-    password: CUSTOM_AIVEN_DB_PDUB , 
-    database: CUSTOM_AIVEN_DB_NAME , 
-
-    ssl: {
-      
-      // WHETHER --offline OR NOT, if rejectUnauthorized IS NOT SET EXPLICITLY TO false, 
-      // e.g. rejectUnauthorized: false 
-      // PRODUCES >>> ConnectionError [SequelizeConnectionError]: self-signed certificate in certificate chain
-      // rejectUnauthorized: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? true : false ,
-      rejectUnauthorized: false , 
-      
-      // WHETHER ca is SET or UNSET HAS NO impact AT ALL
-      // ca: (CUSTOM_AIVEN_DB_URL !== 'localhost') ? CA_CERT.replace(/\\n/g, "\n") : null , 
-      // ca: CA_CERT.replace(/\\n/g, "\n") ,
-    } ,
-  } , 
-  define: {
-    timestamps: false
-  },
-};
-const sequelize = new Sequelize( CUSTOM_AIVEN_DB_NAME, CUSTOM_AIVEN_DB_USER, CUSTOM_AIVEN_DB_PDUB, configObjAiven2 );
-*/
-
-// =============================================
-// DATABASE CONNECTION
-// =============================================
-sequelize.authenticate()
-.then(() => {
-  console.log("Connection has been successfully established.\n\n");
-})
-.catch((error) => {
-  console.error("Unable to connect to DB: \n\n" , error );
-});
-// .finally(() => {
-//   sequelize.close();
-// });
-
-// =============================================
-// MODEL SCHEMA - EVENTS
-// =============================================
-
-// console.log( "Transaction model, standing-by!!!\n\n" );
-
-const Transaction = sequelize.define( 
-    
-    "transaction" , 
-
-    {
-      id: {
-        type: DataTypes.STRING.BINARY ,
-        defaultValue: fn( 'UUID_TO_BIN' , v1() ) , 
-        primaryKey: true ,
-        allowNull: false ,
-        unique: true ,
-      } ,  
-
-      date: {
-        type: DataTypes.DATE , 
-        allowNull: false ,  
-        defaultValue: DataTypes.NOW ,  // This way the current date/time will be used to populate this column (at the moment of insertion)
-      } , 
-      
-      total: {
-        type: DataTypes.FLOAT(4) , 
-        allowNull: true , 
-        defaultValue: null , 
-      } , 
-
-      items: {
-        type: DataTypes.TEXT , 
-        allowNull: true , 
-        defaultValue: null , 
-      } , 
-      
-      tax: {
-        type: DataTypes.FLOAT(4) , 
-        allowNull: true , 
-        defaultValue: null , 
-      } , 
-
-    }  , 
-    
-    { 
-      tableName: "transactions" 
-    }
-);
-
-// =============================================
-// MODEL SCHEMA - EVENTS
-// =============================================
-
-// console.log( "Inventory model, standing-by!!!\n\n" );
-
-const Inventory = sequelize.define( 
-    
-    "inventory" , 
-
-    {      
-      
-      id: {        
-        type: DataTypes.STRING.BINARY , 
-        defaultValue: fn( 'UUID_TO_BIN' , v1() ) , 
-        primaryKey: true ,
-        allowNull: false ,
-        unique: true ,
-      } , 
-
-      name: {
-        type: DataTypes.STRING({ length: 250 }) , 
-        allowNull: true , 
-        defaultValue: null , 
-      } , 
-      
-      price: {
-        type: DataTypes.FLOAT(4) , 
-        allowNull: true , 
-        defaultValue: null , 
-      } , 
-
-      quantity: {
-        type: DataTypes.INTEGER , 
-        allowNull: false , 
-      } , 
-
-    }  , 
-    
-    { 
-      tableName: "inventory" ,
-    }
-);
-
-// Inventory.prototype.decrementInventory = function(arrItems){ // nope
-Inventory.decrementInventory = function(arrItems){ // yeppers
-  
-  // console.log( "Inventory.decrementInventory arrItems", arrItems );
-
-  async.forEachOf( 
-    
-    arrItems, 
-
-    async ( purchasedItem, idx, callback ) => { 
-      
-      await console.log( '\n\n' , "await purchasedItem", await purchasedItem );
-
-      try {
-        
-        var findParam = {
-          where: {
-            id: { 
-              [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
-            }
-          } 
-        };
-
-        // console.log( '\n\n' , "findParam", findParam );
-
-        let itemInStock = await Inventory.findOne( await findParam );
-        
-        if (await itemInStock === null){
-          console.log( '\n\n' , 'Not found!');
-        }
-        
-        if (await itemInStock !== null) {
-          
-          try{
-            
-            await console.log( '\n\n' , 'await itemInStock', await itemInStock);
-            // await console.log('typeof await itemInStock.quantity', typeof await itemInStock.quantity); // number
-            // await console.log('typeof await purchasedItem.quantity', typeof await purchasedItem.quantity); // number
-
-            if( await itemInStock.quantity >= await purchasedItem.quantity ){
-              
-              await console.log( '\n' , `Successfully purchased ${await purchasedItem.quantity} ${await purchasedItem.name}s!`);
-              
-              var optionsPm = await {
-                where: {
-                  id: { 
-                    [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
-                  }
-                } 
-              };
-
-              // await console.log( 'await optionsPm', await optionsPm );
-
-              var qtyDiff = await itemInStock.quantity - await purchasedItem.quantity; 
-
-              const updatedQuantity = await {
-                quantity: await qtyDiff
-              };
-
-              // let updatedinventory = await Inventory.update( await updatedQuantity , await optionsPm ); 
-
-              let updatedinventory = await itemInStock.update( await updatedQuantity , await optionsPm ); 
-              await console.log("await updatedinventory: " , await updatedinventory );
-              
-              // return await updatedinventory;
-              // return updatedinventory;
-            }
-            else
-            if( await itemInStock.quantity < await purchasedItem.quantity ){
-              await console.error('\n' ,"Cannot complete this portion of transaction");
-              await console.error(`Attempted to buy ${await purchasedItem.quantity} ${await purchasedItem.name}s but there are only ${await itemInStock.quantity} available!`);
-            }
-          }
-          catch(derrp){
-            console.log( '\n\n' , "try/catch derrp", derrp );
-            return callback(derrp);
-          }  
-        }
-      }
-      catch(e){
-        console.log( '\n\n' , "try/catch e", e );
-        return callback(e);
-      }
-    } , 
-
-    err => {
-      if (err) {
-        console.error( '\n\n' , "err: " , err );
-        // console.error( '\n\n' , "err.message: " , err.message );
-      }
-    }
-
-  ); // END async.forEachOf()
-  
-
-}; // END decrementInventory
-
 
 // =============================================
 // START LAMBDA FUNCTION
@@ -488,6 +32,103 @@ exports.handler = async (event, context, callback) => {
     simonsays = netlifyresponseobject;
     return simonsays;
   }
+
+  const decrementInventory = (arrItems) => {
+    
+    console.log( "decrementInventory arrItems", arrItems );
+
+    async.forEachOf( 
+      
+      arrItems, 
+
+      async ( purchasedItem, idx, callback ) => { 
+        
+        // await console.log( '\n\n' , "await purchasedItem", await purchasedItem );
+
+        try {
+          
+          var findParam = {
+            where: {
+              id: { 
+                [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
+              }
+            } 
+          };
+
+          // console.log( '\n\n' , "findParam", findParam );
+
+          let itemInStock = await Inventory.findOne( await findParam );
+          
+          // if (await itemInStock === null){
+          //   console.log( '\n\n' , 'Not found!');
+          // }
+          
+          if (await itemInStock !== null) {
+            
+            try{
+              
+              // await console.log( '\n\n' , 'await itemInStock', await itemInStock);
+              // await console.log('typeof await itemInStock.quantity', typeof await itemInStock.quantity); // number
+              // await console.log('typeof await purchasedItem.quantity', typeof await purchasedItem.quantity); // number
+
+              if( await itemInStock.quantity >= await purchasedItem.quantity ){
+                
+                // await console.log( '\n' , `Successfully purchased ${await purchasedItem.quantity} ${await purchasedItem.name}s!`);
+                
+                var optionsPm = await {
+                  where: {
+                    id: { 
+                      [Op.eq]: fn( 'UUID_TO_BIN' , await purchasedItem.id ) 
+                    }
+                  } 
+                };
+
+                // await console.log( 'await optionsPm', await optionsPm );
+
+                var qtyDiff = await itemInStock.quantity - await purchasedItem.quantity; 
+
+                const updatedQuantity = await {
+                  quantity: await qtyDiff
+                };
+
+                // let updatedinventory = await Inventory.update( await updatedQuantity , await optionsPm ); 
+
+                let updatedinventory = await itemInStock.update( await updatedQuantity , await optionsPm ); 
+                await console.log("await updatedinventory: " , await updatedinventory );
+                
+                // return await updatedinventory;
+                // return updatedinventory;
+              }
+              else
+              if( await itemInStock.quantity < await purchasedItem.quantity ){
+                await console.error('\n' ,"Cannot complete this portion of transaction");
+                await console.error(`Attempted to buy ${await purchasedItem.quantity} ${await purchasedItem.name}s but there are only ${await itemInStock.quantity} available!`);
+              }
+            }
+            catch(derrp){
+              console.log( '\n\n' , "try/catch derrp", derrp );
+              return callback(derrp);
+            }  
+          }
+        }
+        catch(e){
+          console.log( '\n\n' , "try/catch e", e );
+          return callback(e);
+        }
+      } , 
+
+      err => {
+        if (err) {
+          console.error( '\n\n' , "err: " , err );
+          // console.error( '\n\n' , "err.message: " , err.message );
+        }
+      }
+
+    ); // END async.forEachOf()
+    
+
+  }; // END decrementInventory
+  
 
   try{
     
@@ -523,10 +164,9 @@ exports.handler = async (event, context, callback) => {
     // await console.log("await transaction: " , await transaction );
     // await console.log("await transaction instanceof Transaction" , await transaction instanceof Transaction );
     
+    // NEW
     if( await transaction.items !== undefined ){
-      await Inventory.decrementInventory( await JSON.parse( transaction.items ) ); // correct!
-      // await Inventory.decrementInventory( JSON.parse( await transaction.items ) ); 
-      // await console.log( "transaction.items", await transaction.items );
+      await decrementInventory( await JSON.parse( transaction.items ) );
     }
 
     const netlifyresponseobject = {
