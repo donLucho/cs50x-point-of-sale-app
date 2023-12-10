@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "async": "^3.2.5",
     "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.2",
     "date-fns": "^2.30.0",
@@ -27,7 +28,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "smores-netlify": "npm install --save @babel/plugin-proposal-private-property-in-object @fortawesome/fontawesome-free@latest bcrypt@latest bootstrap@latest date-fns@latest jsonwebtoken@latest jwt-decode@latest mysql2@latest node-sass@latest npm-run-all@latest pg-hstore@latest react-bootstrap@latest react-router@latest react-router-dom@latest sequelize@latest && npm install --save-dev kill-port@latest netlify-cli@latest",
+    "smores-netlify": "npm install --save @babel/plugin-proposal-private-property-in-object @fortawesome/fontawesome-free@latest async@latest bcrypt@latest bootstrap@latest date-fns@latest jsonwebtoken@latest jwt-decode@latest mysql2@latest node-sass@latest npm-run-all@latest pg-hstore@latest react-bootstrap@latest react-router@latest react-router-dom@latest sequelize@latest && npm install --save-dev kill-port@latest netlify-cli@latest",
     "requiredlibs": "npm run smores-netlify",
     "offlinedev": "netlify dev --offline",
     "dev": "netlify dev",
