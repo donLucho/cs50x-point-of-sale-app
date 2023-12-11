@@ -6,9 +6,10 @@ Cs50x final project 2023 submitted by Luis Artavia.
 
 
 ## Important Links
-###### Video (unlisted): [https://www.youtube.com](https://www.youtube.com)
+###### Video (unlisted): [https://youtu.be/-H2zDlXkTeI](https://youtu.be/-H2zDlXkTeI "link to video called 'Luis Artavia cs50x 2023 final project'")
 ###### Source code: [github](https://github.com/donLucho/cs50x-point-of-sale-app)
 ##
+
 
 ## My audience(s)
 First, the staff at Harvard Cs50 and/or at Ed-X is **my main audience**; in other words, whoever is responsible for evaluating my work and for giving me credit for completion of this course is **my primary audience**. Then, anybody in the not-too-distant future that is interested in exploring similar themes (such as Netlify, Aiven, Sequelize, CRA, etc.) they, too, are welcome to snoop around.
@@ -26,6 +27,17 @@ In general, the work came in two phases: the pre-work (discovery) and the develo
 From 11/11/2023 to 11/21/2023, a considerable amount of energy was devoted to [ably](https://ably.com/ "link to ably"). Based on [a search-engine result that took me to netlify](https://www.netlify.com/integrations/ably/ "link to ntl"), I was confident that websockets for free would be a thing. In the end, I exceeded my allotted quota and decided it would be more practical to ditch websockets for netlify rather than burn through multiple email addresses in order to include websockets at all.
 
 
+## Hands-down: the most difficult piece of the puzzle
+From 11/25/2023 to 12/10/2023 (today), I had to grapple with getting the lambda functions working. The functions console in the Netlify API was a lifesaver in this respect. Along the way, Polyscale was 'integrated' but not utilized. ***Polyscale*** was supposed to have facilitated a cache between ***the client*** and ***the Aiven DB*** but I found that it did not work at all as advertised. ***I opted for Aiven DB!*** In a smaller companion project, I was able to complete a plain-vanilla GET request to the same database at the push of a button. But as I was saying, neither Polyscale DB Caching nor Aiven DB for use with Netlify are documented. This was a labor of love that took me into new territory. The constraints included:
+1. **Aiven DB:** I had to earn my lumps in order to get it working with Sequelize;
+2. **Polyscale:** Same as above, plus, I discovered the hard way that the bottom would eventually fall out from beneath where I stood&hellip; I became acquainted with **"ConnectionError [SequelizeConnectionError]: connect ETIMEDOUT"** when least expected; I replicated the same error when testing locally upon tucking away the .env file elsewhere; the netlify-cli injected values but they were never read or recalled afterwards;
+3. **All lambdas:** The lambdas were divided into re-usable components such as a) db-connection; b) models; c) handler functions; they did not start out that way, thus, when experimenting with one connection, inevitably, the other eleven had to be changed, too. After exceeding the ten second timeout again and again, I thought that the inherent *kruftiness* each lambda function carried became an issue. Yes, they started out ugly, but this was not the issue!
+4. **userlogin lambda:** A successful connection was made possible courtesy of sticking with ***Aiven DB credentials***;
+5. **createonetransaction:** The final constraint I would face forced me to re-imagine the composition of the lambda function and the accompanying two models that it would employ; what started as a Model-prototype function called decrementInventory was originally located in inventory.model.js and would have to be re-expressed entirely in createonetransaction.js;
+6. **async:** The npm package called **async** has two built-in helper functions called *eachOf (alias forEachOf)* and *eachLimit (forEachLimit)*; the former executes parallel threads and the latter can execute one thread maximum at a time if you so choose. Originally, at least in the context of Netlify serverless functions, decrementInventory was sporadically working. Once I replaced **forEachOf** with **forEachLimit**, the functions console in the Netlify API confirmed for me that the decrementInventory functionality was finally working from ***A to Z***.
+7. **PlanetScale vs. PolyScale... Lambda vs. Edge:** As advertised, Netlify suggests that ***PolyScale*** goes hand in hand with PostgreSQL and that ***PlanetScale*** goes hand in hand with Lambda functions; I am unemployed and have limited resources, hence, it is not possible for me to part with a creditcard number in order to just set up a database with ***PlanetScale***. *This is why I like* ***Aiven***&nbsp;*!!!*
+
+
 ## What I liked most about this project
 I enjoyed using Aiven -- this was a first for me. I never knew that it existed previous to beginning my research. Aiven will likely be my database provider for the forseeable future. As a result, I will likely learn how to program in PostgreSQL and go from there. 
 
@@ -35,7 +47,7 @@ You are the owner of a small-business and you need to track inventory, as well a
 
 
 ### Organization of said project
-The project has front and back ends and makes use of two distinct providers of SAAS and PAAS (software or platform as a service). 
+The project has front and back ends and makes use of two distinct providers of SAAS and PAAS (software or platform as a service, respectively). 
 
 
 #### Webpage
